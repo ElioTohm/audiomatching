@@ -11,11 +11,11 @@ class BaseRecognizer(object):
         self.xmsmatch = xmsmatch
         self.Fs = fingerprint.DEFAULT_FS
 
-    def _recognize(self, timestamp, *data):
+    def _recognize(self, timestamp, client_id, *data):
         matches = []
         for d in data:
             matches.extend(self.xmsmatch.find_matches(d, timestamp, Fs=self.Fs))
-        return self.xmsmatch.align_matches(matches)
+        return self.xmsmatch.align_matches(matches, timestamp, client_id)
 
     def recognize(self):
         pass  # base class does nothing
@@ -32,7 +32,7 @@ class FileRecognizer(BaseRecognizer):
         timestamp = int(timestamp_with_mp3[0])
 
         t = time.time()
-        match = self._recognize(timestamp, *frames)
+        match = self._recognize(timestamp, filename_info_array[1], *frames)
         t = time.time() - t
 
         if match:

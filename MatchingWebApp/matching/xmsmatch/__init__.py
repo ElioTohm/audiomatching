@@ -123,7 +123,7 @@ class Matcher(object):
         hashes = fingerprint.fingerprint(samples, Fs=Fs)
         return self.db.return_matches(hashes, timestamp)
 
-    def align_matches(self, matches):
+    def align_matches(self, matches, timestamp, client_id):
         """
             Finds hash matches that align in time with other matches and finds
             consensus about which hashes are "true" signal from the audio.
@@ -166,7 +166,10 @@ class Matcher(object):
             Matcher.CONFIDENCE : largest_count,
             Matcher.OFFSET : int(largest),
             Matcher.OFFSET_SECS : nseconds,
-            Database.FIELD_FILE_SHA1 : record.get(Database.FIELD_FILE_SHA1, None),}
+            Database.FIELD_FILE_SHA1 : record.get(Database.FIELD_FILE_SHA1, None),
+            Database.FIELD_TIMESTAMP: timestamp,
+            'client_id' : client_id
+            }
         return record
 
     def recognize(self, recognizer, *options, **kwoptions):

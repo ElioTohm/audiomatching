@@ -24,19 +24,17 @@ def match(request):
 
                 # create a Matcher instance
                 djv = Matcher(config)
-                result = {}
+                result = list()
                 info = json.loads(request.body)
                 for client_record in info['records']:                    
                     client_file_path = os.path.join(module_dir, 'clientrecord/' + client_record)
                     
                     record = djv.recognize(FileRecognizer, client_file_path)
                     if record is None:
-                        result[client_record] = 'none'
+                        result.append('none')
                     else:
-                        result[client_record] = record
-            return JsonResponse(result)
-
-    
+                        result.append(record)
+            return HttpResponse(json.dumps(result))
 
 @csrf_exempt
 def fingerprint(request):
