@@ -1,5 +1,11 @@
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
+
+from django.contrib.auth.models import User, Group
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 # matching imports
 from django.http import JsonResponse
@@ -12,7 +18,9 @@ from xmsmatch import Matcher
 from xmsmatch.recognize import FileRecognizer
 
 
-@csrf_exempt
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated, ))
 def match(request):
     if request.method == 'POST':
         # load config from a JSON file (or anything outputting a python dictionary)
@@ -34,9 +42,13 @@ def match(request):
                         result.append('none')
                     else:
                         result.append(record)
-            return HttpResponse(json.dumps(result))
+            return Response(result)
+    else:
+        return Response({"error": "get request was sent instead of post"})
 
-@csrf_exempt
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated, ))
 def fingerprint(request):
     if request.method == 'POST':
         
@@ -51,4 +63,6 @@ def fingerprint(request):
             # Fingerprint all the mp3's in the directory we give it
             djv.fingerprint_directory(module_dir + "/mp3", [".mp3"])
         
-        return JsonResponse({'fingerprint':'done'})
+        return Response({'fingerprint':'done'})
+    else:
+        return Response({'error':'get request was sent instead of post'})

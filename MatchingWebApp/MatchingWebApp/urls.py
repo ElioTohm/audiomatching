@@ -15,8 +15,12 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from rest_framework import routers
+from matching import views
 
+# use rest_framework to authenticate every request to api
 urlpatterns = [
-	url(r'^matching/', include('matching.urls')),
-    url(r'^admin', admin.site.urls),
+	url(r'^matching/match/', views.match),
+	url(r'^matching/fingerprint/', views.fingerprint),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
