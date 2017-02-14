@@ -92,9 +92,8 @@ class Matcher(object):
                 traceback.print_exc(file=sys.stdout)
             else:
                 sid = self.db.insert_record(channel_id, file_hash, timestamp)
-
-                self.db.insert_hashes(sid, hashes, timestamp)
                 self.db.set_record_fingerprinted(sid)
+                self.db.insert_hashes(sid, hashes, timestamp)
                 self.get_fingerprinted_records()
 
         pool.close()
@@ -176,7 +175,6 @@ class Matcher(object):
         r = recognizer(self)
         return r.recognize(*options, **kwoptions)
 
-
 def _fingerprint_worker(filename, limit=None, channel_id=None):
     # Pool.imap sends arguments as tuples so we have to unpack
     # them ourself.
@@ -200,6 +198,10 @@ def _fingerprint_worker(filename, limit=None, channel_id=None):
         print("Finished channel %d/%d for %s" % (channeln + 1, channel_amount,
                                                  filename))
         result |= set(hashes)
+
+        os.unlink(filename)
+        
+        # delete file after fingerprinting
 
     return channel_id, result, file_hash
 

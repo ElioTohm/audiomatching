@@ -42,10 +42,14 @@ def match(request):
                     client_file_path = os.path.join(module_dir, 'clientrecord/' + client_record)
                     
                     record = djv.recognize(FileRecognizer, client_file_path)
+
                     if record is None:
                         result.append({'none':record})
                     else:
                         result.append(record)
+
+                    # remove file matched 
+                    os.unlink(client_file_path)
 
             client = MongoClient('localhost', 27017)
             db = client['database']
@@ -62,8 +66,9 @@ def match(request):
 @permission_classes((IsAuthenticated, ))
 def fingerprint(request):
     if request.method == 'POST':
-        
-        module_dir = os.path.dirname(__file__)  # get current directory
+
+        # get current directory
+        module_dir = os.path.dirname(__file__)  
         file_path = os.path.join(module_dir, 'xmsmatch.cnf.SAMPLE')
         with open(file_path) as f:
             # load config from a JSON file (or anything outputting a python dictionary)
@@ -74,7 +79,7 @@ def fingerprint(request):
 
             # Fingerprint all the mp3's in the directory we give it
             djv.fingerprint_directory(module_dir + "/mp3", [".mp3"])
-        
+            
         return Response({'fingerprint':'done'})
     else:
         return Response({'error':'get request was sent instead of post'})
