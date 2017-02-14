@@ -16,6 +16,10 @@ warnings.filterwarnings("ignore")
 
 from xmsmatch import Matcher
 from xmsmatch.recognize import FileRecognizer
+import datetime
+import pprint
+from pymongo import MongoClient
+
 
 
 
@@ -39,10 +43,17 @@ def match(request):
                     
                     record = djv.recognize(FileRecognizer, client_file_path)
                     if record is None:
-                        result.append('none')
+                        result.append({'none':record})
                     else:
                         result.append(record)
-            return Response(result)
+
+            client = MongoClient('localhost', 27017)
+            db = client['database']
+            collection = db.records
+            
+            collection.insert_many(result)
+            
+            return Response({'match':'done'})
     else:
         return Response({"error": "get request was sent instead of post"})
 
@@ -57,6 +68,7 @@ def fingerprint(request):
         with open(file_path) as f:
             # load config from a JSON file (or anything outputting a python dictionary)
             config = json.load(f)
+            
             # create a Matcher instance
             djv = Matcher(config)
 
