@@ -1,6 +1,6 @@
 {
     "timestamp_interval":{
-        "upper_bound": 600000 ,
-        "lower_bound": 600000
+        "upper_bound": 5000 ,
+        "lower_bound": 5000
     }
 }

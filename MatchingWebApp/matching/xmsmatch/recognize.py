@@ -28,8 +28,8 @@ class FileRecognizer(BaseRecognizer):
     def recognize_file(self, filename):
         frames, self.Fs, file_hash = decoder.read(filename, self.xmsmatch.limit)
         filename_info_array = filename.split("_")
-        timestamp_with_mp3 = filename_info_array[2].split(".") 
-        timestamp = int(timestamp_with_mp3[0])
+        timestamp_without_mp3 = filename_info_array[2].split(".") 
+        timestamp = int(timestamp_without_mp3[0])
 
         t = time.time()
         match = self._recognize(timestamp, filename_info_array[1], *frames)

@@ -113,9 +113,8 @@ class Matcher(object):
                 channel_id=channel_id
             )
             sid = self.db.insert_record(channel_id, file_hash)
-
-            self.db.insert_hashes(sid, hashes)
             self.db.set_record_fingerprinted(sid)
+            self.db.insert_hashes(sid, hashes)
             self.get_fingerprinted_records()
 
     def find_matches(self, samples, timestamp, Fs=fingerprint.DEFAULT_FS):
