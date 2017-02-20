@@ -10,6 +10,7 @@ class Database(object):
     FIELD_OFFSET = 'offset'
     FIELD_HASH = 'hash'
     FIELD_TIMESTAMP = 'timestamp'
+    FIELD_CHANNEL_NAME = 'channel_name'
 
     # Name of your Database subclass, this is used in configuration
     # to refer to your class
@@ -104,7 +105,7 @@ class Database(object):
         pass
 
     @abc.abstractmethod
-    def insert_record(self, channel_id, timestamp):
+    def insert_record(self, channel_id, channel_name, timestamp):
         """
         Inserts a record name into the database, returns the new
         identifier of the record.

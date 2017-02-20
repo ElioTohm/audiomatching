@@ -13,6 +13,7 @@ class Matcher(object):
     CHANNEL_ID = 'channel_id'
     CONFIDENCE = 'confidence'
     MATCH_TIME = 'match_time'
+    CHANNEL_NAME = 'channel_name'
     OFFSET = 'offset'
     OFFSET_SECS = 'offset_seconds'
 
@@ -81,7 +82,7 @@ class Matcher(object):
                 channel_info_array  = channel_id.split("_")
                 channel_id =  channel_info_array[1]
                 timestamp = channel_info_array[2]
-
+                channel_name = channel_info_array[0]
             except multiprocessing.TimeoutError:
                 continue
             except StopIteration:
@@ -91,7 +92,7 @@ class Matcher(object):
                 # Print traceback because we can't reraise it here
                 traceback.print_exc(file=sys.stdout)
             else:
-                sid = self.db.insert_record(channel_id, file_hash, timestamp)
+                sid = self.db.insert_record(channel_id, channel_name, file_hash, timestamp)
                 self.db.set_record_fingerprinted(sid)
                 self.db.insert_hashes(sid, hashes, timestamp)
                 self.get_fingerprinted_records()
@@ -149,8 +150,9 @@ class Matcher(object):
         # extract idenfication
         record = self.db.get_record_by_id(record_id)
         if record:
-            # TODO: Clarify what `get_record_by_id` should return.
+
             recordname = record.get(Matcher.CHANNEL_ID, None)
+            channel_name = record.get(Matcher.CHANNEL_NAME, None)
         else:
             return None
 
@@ -161,6 +163,7 @@ class Matcher(object):
         record = {
             Matcher.RECORD_ID : record_id,
             Matcher.CHANNEL_ID : recordname,
+            Matcher.CHANNEL_NAME : channel_name,
             Matcher.CONFIDENCE : largest_count,
             Matcher.OFFSET : int(largest),
             Matcher.OFFSET_SECS : nseconds,

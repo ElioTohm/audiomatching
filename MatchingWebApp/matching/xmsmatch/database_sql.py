@@ -76,14 +76,15 @@ class SQLDatabase(Database):
     CREATE_RECORDS_TABLE = """
         CREATE TABLE IF NOT EXISTS `%s` (
             `%s` mediumint unsigned not null auto_increment,
-            `%s` varchar(250) not null,
+            `%s` int(10) not null,
+            `%s` varchar(25) ,
             `%s` tinyint default 0,
             `%s` int(10),
             `%s` binary(20) not null,
         PRIMARY KEY (`%s`),
         UNIQUE KEY `%s` (`%s`)
     ) ENGINE=INNODB;""" % (
-        RECORD_TABLE, Database.FIELD_RECORD_ID, Database.FIELD_CHANNEL_ID, FIELD_FINGERPRINTED,
+        RECORD_TABLE, Database.FIELD_RECORD_ID, Database.FIELD_CHANNEL_ID, Database.FIELD_CHANNEL_NAME, FIELD_FINGERPRINTED,
         Database.FIELD_TIMESTAMP, Database.FIELD_FILE_SHA1,
         Database.FIELD_RECORD_ID, Database.FIELD_RECORD_ID, Database.FIELD_RECORD_ID,
     )
@@ -94,8 +95,8 @@ class SQLDatabase(Database):
             (UNHEX(%%s), %%s, %%s, %%s);
     """ % (FINGERPRINTS_TABLENAME, Database.FIELD_HASH, Database.FIELD_RECORD_ID, Database.FIELD_OFFSET, Database.FIELD_TIMESTAMP)
 
-    INSERT_RECORD = "INSERT INTO %s (%s, %s, %s) values (%%s, UNHEX(%%s), %%s);" % (
-        RECORD_TABLE, Database.FIELD_CHANNEL_ID, Database.FIELD_FILE_SHA1, Database.FIELD_TIMESTAMP)
+    INSERT_RECORD = "INSERT INTO %s (%s, %s, %s, %s) values (%%s, %%s, UNHEX(%%s), %%s);" % (
+        RECORD_TABLE, Database.FIELD_CHANNEL_ID, Database.FIELD_CHANNEL_NAME, Database.FIELD_FILE_SHA1, Database.FIELD_TIMESTAMP)
 
     # selects
     SELECT = """
@@ -115,8 +116,8 @@ class SQLDatabase(Database):
     """ % (Database.FIELD_RECORD_ID, Database.FIELD_OFFSET, FINGERPRINTS_TABLENAME)
 
     SELECT_RECORD = """
-        SELECT %s, HEX(%s) as %s FROM %s WHERE %s = %%s;
-    """ % (Database.FIELD_CHANNEL_ID, Database.FIELD_FILE_SHA1, Database.FIELD_FILE_SHA1, RECORD_TABLE, Database.FIELD_RECORD_ID)
+        SELECT %s, %s, HEX(%s) as %s FROM %s WHERE %s = %%s;
+    """ % (Database.FIELD_CHANNEL_ID, Database.FIELD_CHANNEL_NAME, Database.FIELD_FILE_SHA1, Database.FIELD_FILE_SHA1, RECORD_TABLE, Database.FIELD_RECORD_ID)
 
     SELECT_NUM_FINGERPRINTS = """
         SELECT COUNT(*) as n FROM %sx`
@@ -242,12 +243,12 @@ class SQLDatabase(Database):
         with self.cursor() as cur:
             cur.execute(self.INSERT_FINGERPRINT, (hash, sid, offset, timestamp))
 
-    def insert_record(self, recordname, file_hash, timestamp):
+    def insert_record(self, channel_id, channel_name, file_hash, timestamp):
         """
         Inserts record in the database and returns the ID of the inserted record.
         """
         with self.cursor() as cur:
-            cur.execute(self.INSERT_RECORD, (recordname, file_hash, timestamp))
+            cur.execute(self.INSERT_RECORD, (channel_id, channel_name, file_hash, timestamp))
             return cur.lastrowid
 
     def query(self, hash):
