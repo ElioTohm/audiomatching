@@ -27,7 +27,9 @@ from pymongo import MongoClient
 @permission_classes((IsAuthenticated, ))
 def match(request):
     if request.method == 'POST':
-        # load config from a JSON file (or anything outputting a python dictionary)
+        if not os.path.exists('matching/clientrecord/'):
+            os.mkdir('matching/clientrecord/')
+
         module_dir = os.path.dirname(__file__)  # get current directory
         file_path = os.path.join(module_dir, 'xmsmatch.cnf.SAMPLE')
         with open(file_path) as f:
@@ -37,27 +39,32 @@ def match(request):
                 # create a Matcher instance
                 djv = Matcher(config)
                 result = list()
-                info = json.loads(request.body)
-                for client_record in info['records']:                    
-                    client_file_path = os.path.join(module_dir, 'clientrecord/' + client_record)
+                
+                for clientrecording in request.FILES.getlist('client_record'):
+                    if str(clientrecording).endswith('.mp3'):
+                        with open('matching/clientrecord/' + str(clientrecording), 'wb+') as destination:
+                            for chunk in clientrecording.chunks():
+                                destination.write(chunk)  
+                        
+                        client_file_path = os.path.join(module_dir, 'clientrecord/' + str(clientrecording))
+                        record = djv.recognize(FileRecognizer, client_file_path)
+
+                        if record is None:
+                            result.append({'none':client_file_path})
+                        else:
+                            result.append(record)
+
+                        # remove file matched 
+                        print( result )
+                        os.unlink(client_file_path)             
                     
-                    record = djv.recognize(FileRecognizer, client_file_path)
-
-                    if record is None:
-                        result.append({'none':record})
-                    else:
-                        result.append(record)
-
-                    # remove file matched 
-                    os.unlink(client_file_path)
-
             client = MongoClient('localhost', 27017)
             db = client['database']
             collection = db.records
             
             collection.insert_many(result)
-            
-            return Response({'match':'done'})
+
+        return Response({"matched": "done"})
     else:
         return Response({"error": "get request was sent instead of post"})
 

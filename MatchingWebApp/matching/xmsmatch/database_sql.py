@@ -11,6 +11,9 @@ from matching.xmsmatch.database import Database
 import json
 import os
 
+# from pymongo import MongoClient
+
+
 class SQLDatabase(Database):
     """
     Queries:
@@ -272,16 +275,22 @@ class SQLDatabase(Database):
         """
         return self.query(None)
 
-    def insert_hashes(self, sid, hashes, timestamp):
+    def insert_hashes(self, sid, hashes, timestamp, channel_id, channel_name, file_hash):
         """
         Insert series of hash => record_id, offset
         values into the database.
         """
+        # client = MongoClient('localhost', 27017)
+        # db = client.database
+        # collection = db.fingerprints
         values = []
         for hash, offset in hashes:
             values.append((hash, sid, offset, timestamp))
 
+        # collection.insert_one({"channel_id": channel_id, "channel_name": channel_name, "file_hash": file_hash, "fingerprints":values})
+
         with self.cursor() as cur:
+            cur.execute("DELETE FROM fingerprints WHERE timestamp < (UNIX_TIMESTAMP() - 600);")
             for split_values in grouper(values, 1000):
                 cur.executemany(self.INSERT_FINGERPRINT, split_values)
 

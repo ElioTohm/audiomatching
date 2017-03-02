@@ -78,6 +78,7 @@ class Matcher(object):
         while True:
             try:
                 channel_id, hashes, file_hash = iterator.next()
+                
                 #split the channel_id to take the timestamp and the id seperately 
                 channel_info_array  = channel_id.split("_")
                 channel_id =  channel_info_array[1]
@@ -94,7 +95,7 @@ class Matcher(object):
             else:
                 sid = self.db.insert_record(channel_id, channel_name, file_hash, timestamp)
                 self.db.set_record_fingerprinted(sid)
-                self.db.insert_hashes(sid, hashes, timestamp)
+                self.db.insert_hashes(sid, hashes, timestamp, channel_id, channel_name, file_hash)
                 self.get_fingerprinted_records()
 
         pool.close()
@@ -160,6 +161,12 @@ class Matcher(object):
         nseconds = round(float(largest) / fingerprint.DEFAULT_FS *
                          fingerprint.DEFAULT_WINDOW_SIZE *
                          fingerprint.DEFAULT_OVERLAP_RATIO, 5)
+
+        if timestamp % 60 < 30 :
+            timestamp = timestamp - (timestamp % 60)
+        else :
+            timestamp = timestamp - (timestamp % 60) + 60
+            
         record = {
             Matcher.RECORD_ID : record_id,
             Matcher.CHANNEL_ID : recordname,
@@ -200,11 +207,10 @@ def _fingerprint_worker(filename, limit=None, channel_id=None):
         print("Finished channel %d/%d for %s" % (channeln + 1, channel_amount,
                                                  filename))
         result |= set(hashes)
-
-        os.unlink(filename)
         
         # delete file after fingerprinting
-
+        os.unlink(filename)
+        
     return channel_id, result, file_hash
 
 

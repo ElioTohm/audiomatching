@@ -13,7 +13,7 @@ IDX_TIME_J = 1
 ######################################################################
 # Sampling rate, related to the Nyquist conditions, which affects
 # the range frequencies we can detect.
-DEFAULT_FS = 44100
+DEFAULT_FS = 48000
 
 ######################################################################
 # Size of the FFT window, affects frequency granularity
@@ -28,13 +28,13 @@ DEFAULT_OVERLAP_RATIO = 0.5
 ######################################################################
 # Degree to which a fingerprint can be paired with its neighbors --
 # higher will cause more fingerprints, but potentially better accuracy.
-DEFAULT_FAN_VALUE = 100
+DEFAULT_FAN_VALUE = 15
 
 ######################################################################
 # Minimum amplitude in spectrogram in order to be considered a peak.
 # This can be raised to reduce number of fingerprints, but can negatively
 # affect accuracy.
-DEFAULT_AMP_MIN = 15
+DEFAULT_AMP_MIN = 5
 
 ######################################################################
 # Number of cells around an amplitude peak in the spectrogram in order
