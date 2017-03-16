@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from .models import Client
 
 # matching imports
 from django.http import JsonResponse
@@ -36,3 +37,19 @@ def MatchClientAudio(request):
     	return Response({'matching':'done'})
     else:
         return Response({'error':'get request was sent instead of post'})
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated, ))
+def RegisterClient(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        if not data['long'] or not data['lat'] :
+            client = Client()
+            client.save()
+            return Response({'registered': client.id, 'location' : False})
+        else:
+            client = Client(longitude = data['long'], lattitude = data['lat'])
+            client.save()
+            return Response({'registered': client.id, 'location': True, 'long': client.longitude, 'lat': client.lattitude})
+    else:
+        return Response({'error':'cannot register'})
