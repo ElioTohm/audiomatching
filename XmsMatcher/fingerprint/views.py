@@ -31,7 +31,7 @@ def FingerprintFolder(request):
 		            for chunk in clientrecording.chunks():
 		                destination.write(chunk)
 
-		tasks.fingerprint.delay()        
+						tasks.fingerprint.delay(str(clientrecording))        
 	
 		return Response({'fingerprint':'done'})
 
