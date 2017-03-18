@@ -20,7 +20,7 @@ warnings.filterwarnings("ignore")
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
 def FingerprintFolder(request):
-    if request.method == 'POST':
+	if request.method == 'POST':
 		module_dir = os.path.dirname(XmsMatcher.__file__)  
 
 		# for mp3file in os.listdir(module_dir + '/mp3/'):
@@ -32,7 +32,7 @@ def FingerprintFolder(request):
 		        	recordnames.append(str(clientrecording))
 		        	for chunk in clientrecording.chunks():
 		        		destination.write(chunk)
-        tasks.fingerprint.delay(recordnames)        
+		tasks.fingerprint.delay(recordnames)        
 	
 		return Response({'fingerprint':'done'})
 
