@@ -30,8 +30,8 @@ def FingerprintFolder(request):
 		    if str(clientrecording).endswith('.mp3'):
 		        with open(module_dir +'/mp3/' + str(clientrecording), 'wb+') as destination:
 		        	recordnames.append(str(clientrecording))
-		            for chunk in clientrecording.chunks():
-		            	destination.write(chunk)
+		        	for chunk in clientrecording.chunks():
+		        		destination.write(chunk)
         tasks.fingerprint.delay(recordnames)        
 	
 		return Response({'fingerprint':'done'})
