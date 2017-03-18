@@ -37,4 +37,4 @@ def FingerprintFolder(request):
 		return Response({'fingerprint':'done'})
 
     else:
-        return Response({'error':'get request was sent instead of post'})
+    	return Response({'error':'get request was sent instead of post'})
