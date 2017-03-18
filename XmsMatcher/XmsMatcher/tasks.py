@@ -33,9 +33,9 @@ def fingerprint(mp3file):
 	    
 	    # create a Matcher instance
 	    djv = Matcher(config)
-        for file in mp3file:
-            # if str(mp3file).endswith('.mp3'):
-            djv.fingerprint_file(file)
+        # for mp3file in os.listdir(module_dir + '/mp3/'):
+        #     if str(mp3file).endswith('.mp3'):
+        djv.fingerprint_file(module_dir + '/mp3/' + mp3file, mp3file)
 
 
 @shared_task

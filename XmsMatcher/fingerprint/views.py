@@ -20,21 +20,19 @@ warnings.filterwarnings("ignore")
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
 def FingerprintFolder(request):
-	if request.method == 'POST':
+    if request.method == 'POST':
 		module_dir = os.path.dirname(XmsMatcher.__file__)  
 
 		# for mp3file in os.listdir(module_dir + '/mp3/'):
 		# 	if str(mp3file).endswith('.mp3'):
-		recordnames = []
 		for clientrecording in request.FILES.getlist('serverrecord'):
 		    if str(clientrecording).endswith('.mp3'):
 		        with open(module_dir +'/mp3/' + str(clientrecording), 'wb+') as destination:
-		        	recordnames.append(str(clientrecording))
-		        	for chunk in clientrecording.chunks():
-		        		destination.write(chunk)
-		tasks.fingerprint.delay(recordnames)        
+		            for chunk in clientrecording.chunks():
+		                destination.write(chunk)
+		                tasks.fingerprint.delay(str(clientrecording))        
 	
 		return Response({'fingerprint':'done'})
 
     else:
-    	return Response({'error':'get request was sent instead of post'})
+        return Response({'error':'get request was sent instead of post'})
