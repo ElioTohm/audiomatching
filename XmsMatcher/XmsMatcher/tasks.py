@@ -23,7 +23,7 @@ def add(x, y):
 
 
 @shared_task
-def fingerprint():
+def fingerprint(recordarray):
 	# get current directory
 	module_dir = os.path.dirname(__file__)  
 	file_path = os.path.join(module_dir, 'xmsmatch.cnf.SAMPLE')
@@ -33,9 +33,8 @@ def fingerprint():
 	    
 	    # create a Matcher instance
 	    djv = Matcher(config)
-        for mp3file in os.listdir(module_dir + '/mp3/'):
-        	if str(mp3file).endswith('.mp3'):
-        		djv.fingerprint_file(module_dir + '/mp3/' + mp3file, mp3file)
+        for mp3file in recordarray:
+    		djv.fingerprint_file(module_dir + '/mp3/' + mp3file, mp3file)
 
 
 @shared_task
