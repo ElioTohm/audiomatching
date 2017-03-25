@@ -61,24 +61,22 @@ def read(filename, limit=None):
 
         fs = audiofile.frame_rate
     except audioop.error:
-        os.unlink(filename)
-        # print filename
-        # fs, _, audiofile = wavio.readwav(filename)
+        print filename
+        fs, _, audiofile = wavio.readwav(filename)
 
-        # if limit:
-        #     audiofile = audiofile[:limit * 1000]
+        if limit:
+            audiofile = audiofile[:limit * 1000]
 
-        # audiofile = audiofile.T
-        # audiofile = audiofile.astype(np.int16)
+        audiofile = audiofile.T
+        audiofile = audiofile.astype(np.int16)
 
-        # channels = []
-        # for chn in audiofile:
-        #     channels.append(chn)
+        channels = []
+        for chn in audiofile:
+            channels.append(chn)
 
-        # json.dump({'data':channels}, outfile)
+        json.dump({'data':channels}, outfile)
     
-    # return channels, audiofile.frame_rate, unique_hash(filename)
-    return 0, 0, 0 
+    return channels, audiofile.frame_rate, unique_hash(filename)
 
 
 def path_to_recordname(path):
