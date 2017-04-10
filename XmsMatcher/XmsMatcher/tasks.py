@@ -50,9 +50,10 @@ def match(clientrecording):
                 
         client_file_path = os.path.join(module_dir, 'clientrecord/' + str(clientrecording))
         record = djv.recognize(FileRecognizer, client_file_path)
+        client_id = str(clientrecording).split("_")
 
         if record is None:
-            result.append({'none':client_file_path})
+            result.append({'none':client_file_path, 'client_id': client_id[1]})
         else:
             result.append(record)
 
