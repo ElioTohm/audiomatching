@@ -14,6 +14,8 @@ import warnings
 import json
 import os
 from XmsMatcher import tasks 
+from pymongo import MongoClient
+
 warnings.filterwarnings("ignore")
 
 
@@ -43,13 +45,23 @@ def MatchClientAudio(request):
 def RegisterClient(request):
     if request.method == 'POST':
         data = json.loads(request.body)
+
+        client = MongoClient('localhost', 27017)
+        db = client['database']
+        client_name = 'Unknown'
+        if 'name' in data and not data['name']:
+            client_name = data['name']
+        
+        client_inserted = getNextSequence(db.counters,"client_id")    
         if not data['long'] or not data['lat'] :
-            client = Client()
-            client.save()
-            return Response({'registered': client.id, 'location' : False})
+            db.clients.insert({'_id': client_inserted , 'name': client_name})
+
+            return Response({'registered': client_inserted, 'location' : False})
         else:
-            client = Client(longitude = data['long'], lattitude = data['lat'])
-            client.save()
-            return Response({'registered': client.id, 'location': True, 'long': client.longitude, 'lat': client.lattitude})
+            db.clients.insert({'_id': client_inserted, 'name': client_name, 'lon': data['long'], 'lat': data['lat']})
+            return Response({'registered': client_inserted, 'location': True, 'long': data['long'], 'lat': data['lat']})
     else:
         return Response({'error':'cannot register'})
+
+def getNextSequence(collection,name): 
+    return collection.find_and_modify(query= { '_id': name },update= { '$inc': {'seq': 1}}, new=True ).get('seq');
