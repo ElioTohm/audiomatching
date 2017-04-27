@@ -53,7 +53,7 @@ def registerclient(request):
         if 'name' in data and not data['name']:
             client_name = data['name']
 
-        client_inserted = getNextSequence(db.counters, "client_id")
+        client_inserted = getnextsequence(db.counters, "client_id")
         if not data['long'] or not data['lat']:
             db.clients.insert({'_id': client_inserted, 'name': client_name})
 
