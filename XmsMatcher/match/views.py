@@ -28,14 +28,15 @@ def MatchClientAudio(request):
             os.mkdir('XmsMatcher/clientrecord/')
 
         module_dir = os.path.dirname(XmsMatcher.__file__)
-        
+
         for clientrecording in request.FILES.getlist('client_record'):
             if str(clientrecording).endswith('.mp3'):
-                with open(module_dir +'/clientrecord/' + str(clientrecording), 'wb+') as destination:
+                with open(module_dir +'/clientrecord/' +
+                          str(clientrecording), 'wb+') as destination:
                     for chunk in clientrecording.chunks():
                         destination.write(chunk)
                         tasks.match.delay(str(clientrecording))
-    	
+
     	return Response({'matching':'done'})
     else:
         return Response({'error':'get request was sent instead of post'})
@@ -51,17 +52,20 @@ def RegisterClient(request):
         client_name = 'Unknown'
         if 'name' in data and not data['name']:
             client_name = data['name']
-        
-        client_inserted = getNextSequence(db.counters,"client_id")    
-        if not data['long'] or not data['lat'] :
-            db.clients.insert({'_id': client_inserted , 'name': client_name})
+
+        client_inserted = getNextSequence(db.counters, "client_id")
+        if not data['long'] or not data['lat']:
+            db.clients.insert({'_id': client_inserted, 'name': client_name})
 
             return Response({'registered': client_inserted, 'location' : False})
         else:
-            db.clients.insert({'_id': client_inserted, 'name': client_name, 'lon': data['long'], 'lat': data['lat']})
-            return Response({'registered': client_inserted, 'location': True, 'long': data['long'], 'lat': data['lat']})
+            db.clients.insert({'_id': client_inserted, 'name': client_name,
+                               'lon': data['long'], 'lat': data['lat']})
+            return Response({'registered': client_inserted, 'location': True,
+                             'long': data['long'], 'lat': data['lat']})
     else:
         return Response({'error':'cannot register'})
 
-def getNextSequence(collection,name): 
-    return collection.find_and_modify(query= { '_id': name },update= { '$inc': {'seq': 1}}, new=True ).get('seq');
+def getNextSequence(collection,name):
+    return collection.find_and_modify(query={'_id': name},
+                                      update={'$inc': {'seq': 1}}, new=True).get('seq')
