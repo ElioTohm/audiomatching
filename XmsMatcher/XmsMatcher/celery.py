@@ -27,10 +27,15 @@ def setup_periodic_tasks(sender, **kwargs):
 
 @app.task
 def periodicAddData(channel_name, confidence, client_name):
-    print 'joe-congo added' + client_name
+    timestamp = int(time.time())
+    if timestamp % 60 < 30:
+        timestamp = timestamp - (timestamp % 60)
+    else:
+        timestamp = timestamp - (timestamp % 60) + 60
+
+    print '{} {}'.format(client_name, timestamp)
     client = MongoClient('localhost', 27017)
     db = client['database']
 
     db.records.insert_one({'channel_name': channel_name, 'client_id': client_name,
-                           'confidence': confidence, 'timestamp': time.time()})
-                           
+                           'confidence': confidence, 'timestamp': timestamp})
