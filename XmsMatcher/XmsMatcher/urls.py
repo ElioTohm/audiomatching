@@ -20,8 +20,8 @@ from match import views as match_views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-	url(r'^matching/match/', match_views.MatchClientAudio),
-    url(r'^register/', match_views.RegisterClient),
-    url(r'^fingerprint/', fingerprint_views.FingerprintFolder),
+    url(r'^matching/match/', match_views.matchclientaudio),
+    url(r'^register/', match_views.registerclient),
+    url(r'^fingerprint/', fingerprint_views.fingerprintfolder),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

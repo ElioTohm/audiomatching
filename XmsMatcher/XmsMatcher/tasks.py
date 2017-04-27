@@ -14,31 +14,28 @@ import pprint
 from pymongo import MongoClient
 
 @shared_task
-def add(x, y):
-	client = MongoClient('localhost', 27017)
-	db = client['database']
-	collection = db.records
-
-	collection.insert_one({"result":x + y})
-
-
-@shared_task
 def fingerprint(recordarray):
+    """
+        fingerprint task
+    """
 	# get current directory
-	module_dir = os.path.dirname(__file__)  
-	file_path = os.path.join(module_dir, 'xmsmatch.cnf.SAMPLE')
-	with open(file_path) as f:
+    module_dir = os.path.dirname(__file__)
+    file_path = os.path.join(module_dir, 'xmsmatch.cnf.SAMPLE')
+    with open(file_path) as f:
 	    # load config from a JSON file (or anything outputting a python dictionary)
-	    config = json.load(f)
-	    
+        config = json.load(f)
+
 	    # create a Matcher instance
-	    djv = Matcher(config)
+        djv = Matcher(config)
         for mp3file in recordarray:
-    		djv.fingerprint_file(module_dir + '/mp3/' + mp3file, mp3file)
+            djv.fingerprint_file(module_dir + '/mp3/' + mp3file, mp3file)
 
 
 @shared_task
 def match(clientrecording):
+    """
+        match task
+    """
     module_dir = os.path.dirname(__file__)  # get current directory
     file_path = os.path.join(module_dir, 'xmsmatch.cnf.SAMPLE')
     with open(file_path) as f:
@@ -46,8 +43,8 @@ def match(clientrecording):
 
         # create a Matcher instance
         djv = Matcher(config)
-        result = list()  
-                
+        result = list()
+
         client_file_path = os.path.join(module_dir, 'clientrecord/' + str(clientrecording))
         record = djv.recognize(FileRecognizer, client_file_path)
         client_id = str(clientrecording).split("_")
@@ -57,12 +54,12 @@ def match(clientrecording):
         else:
             result.append(record)
 
-        # remove file matched 
-        print( result )
-        os.unlink(client_file_path)             
-            
+        # remove file matched
+        print result
+        os.unlink(client_file_path)
+
         client = MongoClient('localhost', 27017)
         db = client['database']
         collection = db.records
-        
+
         collection.insert_many(result)

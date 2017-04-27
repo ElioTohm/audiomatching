@@ -22,7 +22,7 @@ warnings.filterwarnings("ignore")
 # Create your views here.
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
-def MatchClientAudio(request):
+def matchclientaudio(request):
     if request.method == 'POST':
         if not os.path.exists('XmsMatcher/clientrecord/'):
             os.mkdir('XmsMatcher/clientrecord/')
@@ -43,7 +43,7 @@ def MatchClientAudio(request):
 
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
-def RegisterClient(request):
+def registerclient(request):
     if request.method == 'POST':
         data = json.loads(request.body)
 
@@ -66,6 +66,6 @@ def RegisterClient(request):
     else:
         return Response({'error':'cannot register'})
 
-def getNextSequence(collection,name):
+def getnextsequence(collection, name):
     return collection.find_and_modify(query={'_id': name},
                                       update={'$inc': {'seq': 1}}, new=True).get('seq')

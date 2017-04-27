@@ -21,12 +21,18 @@ app.config_from_object('django.conf:settings')
 
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
+    """
+        Set up periodic task for celerybeat
+    """
     # Calls test('hello') every 2mins.
-    sender.add_periodic_task(120.0, periodicAddData.s('MANAR', 2500, '21'), name='joe-congo 1')
-    sender.add_periodic_task(120.0, periodicAddData.s('ALJADEED', 2500, '20'), name='joe-congo 2')
+    sender.add_periodic_task(120.0, periodicadddata.s('MANAR', 2500, '21'), name='joe-congo 1')
+    sender.add_periodic_task(120.0, periodicadddata.s('ALJADEED', 2500, '20'), name='joe-congo 2')
 
 @app.task
-def periodicAddData(channel_name, confidence, client_name):
+def periodicadddata(channel_name, confidence, client_name):
+    """
+        task to be added periodically
+    """
     timestamp = int(time.time())
     if timestamp % 60 < 30:
         timestamp = timestamp - (timestamp % 60)

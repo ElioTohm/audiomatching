@@ -47,9 +47,9 @@ class Matcher(object):
     def fingerprint_file(self, filepath, channel_id=None):
         recordname = decoder.path_to_recordname(filepath)
         record_hash = decoder.unique_hash(filepath)
-        
-        channel_info_array  = channel_id.split("_")
-        channel_id =  channel_info_array[1]
+
+        channel_info_array = channel_id.split("_")
+        channel_id = channel_info_array[1]
         timestamp = channel_info_array[2]
         timestamp = timestamp.split(".")
         timestamp = timestamp[0]
@@ -113,11 +113,11 @@ class Matcher(object):
                          fingerprint.DEFAULT_WINDOW_SIZE *
                          fingerprint.DEFAULT_OVERLAP_RATIO, 5)
 
-        if timestamp % 60 < 30 :
+        if timestamp % 60 < 30:
             timestamp = timestamp - (timestamp % 60)
-        else :
+        else:
             timestamp = timestamp - (timestamp % 60) + 60
-            
+
         record = {
             Matcher.RECORD_ID : record_id,
             Matcher.CHANNEL_ID : recordname,
@@ -158,10 +158,10 @@ def _fingerprint_worker(filename, limit=None, channel_id=None):
         print("Finished channel %d/%d for %s" % (channeln + 1, channel_amount,
                                                  filename))
         result |= set(hashes)
-        
+
         # delete file after fingerprinting
         os.unlink(filename)
-        
+
     return channel_id, result, file_hash
 
 
