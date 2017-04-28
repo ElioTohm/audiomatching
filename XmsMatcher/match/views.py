@@ -73,5 +73,9 @@ def registerclient(request):
         return Response({'error':'cannot register'})
 
 def getnextsequence(collection, name):
+    """
+        read last number form counters document
+        and increament
+    """
     return collection.find_and_modify(query={'_id': name},
                                       update={'$inc': {'seq': 1}}, new=True).get('seq')
