@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'fingerprint',
     'match',
+    'clientmanager',
     'rest_framework',
 ]
 
