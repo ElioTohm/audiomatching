@@ -38,7 +38,7 @@ def matchclientaudio(request):
                           str(clientrecording), 'wb+') as destination:
                     for chunk in clientrecording.chunks():
                         destination.write(chunk)
-                        tasks.match.delay(str(clientrecording))
+                    tasks.match.apply_async((clientrecording.name,), countdown=30)
 
         return Response({'matching':'done'})
     else:
