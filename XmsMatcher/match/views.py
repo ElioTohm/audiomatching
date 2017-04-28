@@ -23,6 +23,9 @@ warnings.filterwarnings("ignore")
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
 def matchclientaudio(request):
+    """
+        match the audio sent by the clients
+    """
     if request.method == 'POST':
         if not os.path.exists('XmsMatcher/clientrecord/'):
             os.mkdir('XmsMatcher/clientrecord/')
@@ -44,6 +47,9 @@ def matchclientaudio(request):
 @api_view(['GET', 'POST'])
 @permission_classes((IsAuthenticated, ))
 def registerclient(request):
+    """
+        register the client
+    """
     if request.method == 'POST':
         data = json.loads(request.body)
 
