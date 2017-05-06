@@ -56,19 +56,19 @@ def registerclient(request):
         client = MongoClient('localhost', 27017)
         db = client['database']
         client_name = 'Unknown'
-        if 'name' in data and not data['name']:
+        if data['name'] != "":
             client_name = data['name']
 
         client_inserted = getnextsequence(db.counters, "client_id")
         if not data['long'] or not data['lat']:
             db.clients.insert({'_id': client_inserted, 'name': client_name})
 
-            return Response({'registered': client_inserted, 'location' : False})
         else:
             db.clients.insert({'_id': client_inserted, 'name': client_name,
                                'lon': data['long'], 'lat': data['lat']})
-            return Response({'registered': client_inserted, 'location': True,
-                             'long': data['long'], 'lat': data['lat']})
+
+        return Response({'registered': client_inserted, 'version': 0})
+
     else:
         return Response({'error':'cannot register'})
 

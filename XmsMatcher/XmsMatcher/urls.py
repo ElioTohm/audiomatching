@@ -17,11 +17,13 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from fingerprint import views as fingerprint_views
 from match import views as match_views
+from clientmanager import views as clientmanager_views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^matching/match/', match_views.matchclientaudio),
     url(r'^register/', match_views.registerclient),
     url(r'^fingerprint/', fingerprint_views.fingerprintfolder),
+    url(r'^update/', clientmanager_views.mqtpublishmessage),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

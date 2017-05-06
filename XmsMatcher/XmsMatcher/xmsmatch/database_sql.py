@@ -280,26 +280,28 @@ class SQLDatabase(Database):
         Insert series of hash => record_id, offset
         values into the database.
         """
-        # client = MongoClient('localhost', 27017)
-        # db = client.database
-        # collection = db.fingerprints
         values = []
+        # 
+        timestamp_scope = 3600
         for hash, offset in hashes:
             values.append((hash, sid, offset, timestamp))
-
-        # collection.insert_one({"channel_id": channel_id, "channel_name": channel_name, "file_hash": file_hash, "fingerprints":values})
+        module_dir = os.path.dirname(__file__)
+        json_file_path = os.path.join(module_dir, 'sql_statments_config.json')
+        with open(json_file_path) as json_data_file:
+            data = json.load(json_data_file)
+            timestamp_scope = data['lastsavedrecord']
 
         with self.cursor() as cur:
-            cur.execute("DELETE FROM fingerprints WHERE timestamp < (UNIX_TIMESTAMP() - 600);")
             for split_values in grouper(values, 1000):
                 cur.executemany(self.INSERT_FINGERPRINT, split_values)
+            cur.execute("DELETE FROM fingerprints WHERE " +
+                        "timestamp < (UNIX_TIMESTAMP() - {});".format(timestamp_scope))
 
     def return_matches(self, hashes, timestamp):
         """
         Return the (record_id, offset_diff) tuples associated with
         a list of (sha1, sample_offset) values.
         """
-        
         # Take the timestamp difference fromt he sql_statment_config.json file
         module_dir = os.path.dirname(__file__)  # get current directory
         json_file_path = os.path.join(module_dir, 'sql_statments_config.json')
@@ -307,8 +309,8 @@ class SQLDatabase(Database):
         with open(json_file_path) as json_data_file:
             data = json.load(json_data_file)
         lower_bound = timestamp - data["timestamp_interval"]["lower_bound"]
-        upper_bound = timestamp + data["timestamp_interval"]["upper_bound"] 
-        
+        upper_bound = timestamp + data["timestamp_interval"]["upper_bound"]
+
         # Create a dictionary of hash => offset pairs for later lookups
         mapper = {}
         for hash, offset in hashes:

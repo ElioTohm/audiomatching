@@ -2,5 +2,6 @@
     "timestamp_interval":{
         "upper_bound": 15 ,
         "lower_bound": 15
-    }
+    },
+    "lastsavedrecord": 86400
 }
