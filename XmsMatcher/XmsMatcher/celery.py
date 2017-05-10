@@ -25,9 +25,13 @@ def setup_periodic_tasks(sender, **kwargs):
         Set up periodic task for celerybeat
     """
     # Calls test('hello') every 2mins.
-    sender.add_periodic_task(120.0, periodicadddata.s('MANAR', 2500, '21'), name='joe-congo 1')
-    sender.add_periodic_task(120.0, periodicadddata.s('ALJADEED', 2500, '20'), name='joe-congo 2')
-
+    sender.add_periodic_task(120.0, periodicadddata.s('MTV', 2500, '20'), name='joe-congo 1')
+    # sender.add_periodic_task(120.0, periodicadddata.s('GeoTV', 2500, '21'), name='dubai-1')
+    # sender.add_periodic_task(120.0, periodicadddata.s('ExpressNews', 2500, '22'), name='dubai-2')
+    # sender.add_periodic_task(120.0, periodicadddata.s('GeoTV', 2500, '23'), name='dubai-3')
+    sender.add_periodic_task(120.0, periodicadddata.s('Other', 2500, '21'), name='dubai-1')
+    sender.add_periodic_task(120.0, periodicadddata.s('Other', 2500, '22'), name='dubai-2')
+    sender.add_periodic_task(120.0, periodicadddata.s('Other', 2500, '23'), name='dubai-3')
 @app.task
 def periodicadddata(channel_name, confidence, client_name):
     """
