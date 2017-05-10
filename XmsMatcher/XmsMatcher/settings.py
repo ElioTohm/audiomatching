@@ -130,4 +130,4 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 APPEND_SLASH = False
 
 # celery
-DJANGO_SETTINGS_MODULE = os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'XmsMatcher.settings')
+# DJANGO_SETTINGS_MODULE = os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'XmsMatcher.settings')
