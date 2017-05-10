@@ -8,7 +8,7 @@ from celery.schedules import crontab
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'XmsMatcher.settings')
 
-app = Celery('XmsMatcher')
+app = Celery('XmsMatcher', broker='pyamqp://xms:987456321rabbitmq@127.0.0.1:5672/xms')
 
 # Using a string here means the worker don't have to serialize
 # the configuration object to child processes.
