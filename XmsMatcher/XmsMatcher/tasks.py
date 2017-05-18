@@ -50,7 +50,7 @@ def match(clientrecording):
         client_id = str(clientrecording).split("_")
 
         if record is None:
-            timestamp = str(client_id[1]).split(".")
+            timestamp = str(client_id[2]).split(".")
             result.append({'none':client_file_path, 'client_id': client_id[1],
                            'timestamp': timestamp[0], 'channel_name':'Muted', 'confidence':'Muted'})
         else:
