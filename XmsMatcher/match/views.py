@@ -55,6 +55,7 @@ def registerclient(request):
 
         client = MongoClient('localhost', 27017)
         db = client['database']
+        db.authenticate(settings.MONGO_USER, settings.MONGO_PASS)
         client_name = 'Unknown'
         if data['name'] != "":
             client_name = data['name']

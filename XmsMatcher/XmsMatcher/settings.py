@@ -131,3 +131,7 @@ APPEND_SLASH = False
 
 # celery
 # DJANGO_SETTINGS_MODULE = os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'XmsMatcher.settings')
+
+# mongo conenction
+MONGO_USER = 'xmsmongodb'
+MONGO_PASS = 'xms@Prro#123mongo'

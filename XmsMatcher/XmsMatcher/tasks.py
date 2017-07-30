@@ -5,6 +5,8 @@ from pymongo import MongoClient
 import warnings
 import json
 import os
+from django.conf import settings
+
 warnings.filterwarnings("ignore")
 
 from XmsMatcher.xmsmatch import Matcher
@@ -62,6 +64,7 @@ def match(clientrecording):
 
         client = MongoClient('localhost', 27017)
         db = client['database']
+        db.authenticate(settings.MONGO_USER, settings.MONGO_PASS)
         collection = db.records
 
         collection.insert_many(result)
