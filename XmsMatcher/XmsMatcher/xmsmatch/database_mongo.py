@@ -256,20 +256,18 @@ class SQLDatabase(Database):
         timestamp_scope = 3600
         for hash, offset in hashes:
             values.append({"hash": hash, "sid": sid, "offset": offset, "timestamp": timestamp})
-            print "{} {} {} {}".format(hash, sid, offset, timestamp)
         # module_dir = os.path.dirname(__file__)
         # json_file_path = os.path.join(module_dir, 'sql_statments_config.json')
         # with open(json_file_path) as json_data_file:
         #     data = json.load(json_data_file)
         #     timestamp_scope = data['lastsavedrecord']
-
-        collection.insert_many(values)
-        client.close()
         # with self.cursor() as cur:
         #     for split_values in grouper(values, 1000):
         #         cur.executemany(self.INSERT_FINGERPRINT, split_values)
         #     cur.execute("DELETE FROM fingerprints WHERE " +
         #                 "timestamp < (UNIX_TIMESTAMP() - {});".format(timestamp_scope))
+        collection.insert_many(values)
+        client.close()
 
     def return_matches(self, hashes, timestamp):
         """
