@@ -16,7 +16,7 @@ import pprint
 from pymongo import MongoClient
 
 @shared_task
-def fingerprint(recordarray):
+def fingerprint(mp3file):
     """
         fingerprint task
     """
@@ -29,8 +29,8 @@ def fingerprint(recordarray):
 
 	    # create a Matcher instance
         djv = Matcher(config)
-        for mp3file in recordarray:
-            djv.fingerprint_file(module_dir + '/mp3/' + mp3file, mp3file)
+        # for mp3file in recordarray:
+        djv.fingerprint_file(module_dir + '/mp3/' + mp3file, mp3file)
 
 
 @shared_task

@@ -8,7 +8,7 @@ from celery import Celery
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'XmsMatcher.settings')
 
 # app = Celery('XmsMatcher', broker='pyamqp://xms:987456321rabbitmq@127.0.0.1:5672/xms')
-app = Celery('XmsMatcher', broker='pyamqp://xms:987456321rabbitmq@127.0.0.1:5672/')
+app = Celery('XmsMatcher', backend="mongodb://127.0.0.1/celery", broker='pyamqp://xms:987456321rabbitmq@127.0.0.1:5672/')
 
 # Using a string here means the worker don't have to serialize
 # the configuration object to child processes.
@@ -18,6 +18,7 @@ app.config_from_object('django.conf:settings')
 
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks()
+
 
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):

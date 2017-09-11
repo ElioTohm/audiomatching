@@ -232,7 +232,6 @@ class SQLDatabase(Database):
         values = []
         client = MongoClient('127.0.0.1', 27017)
         db = client['database']
-        # db.authenticate(settings.MONGO_USER, settings.MONGO_PASS)
         collection = db.fingerprints
 
 
@@ -274,10 +273,10 @@ class SQLDatabase(Database):
         #         query = query % (lower_bound, upper_bound, ', '.join(['UNHEX(%s)'] * len(split_values)))
 
         #         cur.execute(query ,split_values)
-        client = MongoClient('127.0.0.1', 27017)
-        db = client['database']
-        # db.authenticate(settings.MONGO_USER, settings.MONGO_PASS)
-        collection = db.fingerprints
+        # client = MongoClient('127.0.0.1', 27017)
+        # db = client['database']
+        # # db.authenticate(settings.MONGO_USER, settings.MONGO_PASS)
+        # collection = db.fingerprints
 
         """SELECT Database.FIELD_HASH, Database.FIELD_RECORD_ID, Database.FIELD_OFFSET
          FROM ( SELECT Database.FIELD_HASH, Database.FIELD_RECORD_ID, Database.FIELD_OFFSET 
