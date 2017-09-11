@@ -174,4 +174,4 @@ def get_database(database_type=None):
 
 
 # Import our default database handler
-import XmsMatcher.xmsmatch.database_sql
+import XmsMatcher.xmsmatch.database_mongo

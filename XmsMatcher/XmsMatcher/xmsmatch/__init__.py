@@ -43,6 +43,30 @@ class Matcher(object):
             record_hash = record[Database.FIELD_FILE_SHA1]
             self.recordhashes_set.add(record_hash)
 
+    def fingerprint_directory(self, filepath, recordslist):
+        # Try to use the maximum amount of processes if not given.
+        for channel_id in recordslist:
+            recordname = decoder.path_to_recordname(filepath + channel_id)
+            record_hash = decoder.unique_hash(filepath + channel_id)
+
+            channel_info_array = channel_id.split("_")
+            channel_id = channel_info_array[1]
+            timestamp = channel_info_array[2]
+            timestamp = timestamp.split(".")
+            timestamp = timestamp[0]
+            channel_name = channel_info_array[0]
+
+            channel_id = channel_id or recordname
+            channel_id, hashes, file_hash = _fingerprint_worker(
+                filepath,
+                self.limit,
+                channel_id=channel_id
+            )
+            sid = self.db.insert_record(channel_id, channel_name, file_hash, timestamp)
+            self.db.set_record_fingerprinted(sid)
+            self.db.insert_hashes(sid, hashes, timestamp, channel_id, channel_name, file_hash)
+            self.get_fingerprinted_records()
+
 
     def fingerprint_file(self, filepath, channel_id=None):
         recordname = decoder.path_to_recordname(filepath)

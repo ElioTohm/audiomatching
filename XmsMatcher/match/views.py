@@ -13,7 +13,7 @@ from django.http import JsonResponse
 import warnings
 import json
 import os
-from XmsMatcher import tasks 
+from XmsMatcher import celery
 from pymongo import MongoClient
 
 warnings.filterwarnings("ignore")
