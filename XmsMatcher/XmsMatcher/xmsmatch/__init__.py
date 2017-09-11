@@ -34,14 +34,6 @@ class Matcher(object):
         if self.limit == -1:  # for JSON compatibility
             self.limit = None
 
-    def get_fingerprinted_records(self):
-        # get records previously indexed
-        self.records = self.db.get_records()
-        self.recordhashes_set = set()  # to know which ones we've computed before
-        for record in self.records:
-            record_hash = record[Database.FIELD_FILE_SHA1]
-            self.recordhashes_set.add(record_hash)
-
 
     def fingerprint_file(self, filepath, channel_id=None):
         recordname = decoder.path_to_recordname(filepath)
@@ -60,8 +52,7 @@ class Matcher(object):
             self.limit,
             channel_id=channel_id
         )
-        sid = self.db.insert_record(channel_id, channel_name, file_hash, timestamp)
-        self.db.insert_hashes(sid, hashes, timestamp, channel_id, channel_name, file_hash)
+        self.db.insert_hashes(hashes, timestamp, channel_id, channel_name, file_hash)
 
     def find_matches(self, samples, timestamp, Fs=fingerprint.DEFAULT_FS):
         hashes = fingerprint.fingerprint(samples, Fs=Fs)

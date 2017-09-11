@@ -65,9 +65,6 @@ class SQLDatabase(Database):
             (UNHEX(%%s), %%s, %%s, %%s);
     """ % (FINGERPRINTS_TABLENAME, Database.FIELD_HASH, Database.FIELD_RECORD_ID, Database.FIELD_OFFSET, Database.FIELD_TIMESTAMP)
 
-    INSERT_RECORD = "INSERT INTO %s (%s, %s, %s, %s) values (%%s, %%s, UNHEX(%%s), %%s);" % (
-        RECORD_TABLE, Database.FIELD_CHANNEL_ID, Database.FIELD_CHANNEL_NAME, Database.FIELD_FILE_SHA1, Database.FIELD_TIMESTAMP)
-
     # selects
     SELECT = """
         SELECT %s, %s FROM %s WHERE %s = UNHEX(%%s);
@@ -206,20 +203,6 @@ class SQLDatabase(Database):
         collection.insert_one((hash, sid, offset, timestamp))
         client.close()
 
-    def insert_record(self, channel_id, channel_name, file_hash, timestamp):
-        """
-        Inserts record in the database and returns the ID of the inserted record.
-        """
-        # with self.cursor() as cur:
-            # cur.execute(self.INSERT_RECORD, (channel_id, channel_name, file_hash, timestamp))
-        client = MongoClient('127.0.0.1', 27017)
-        db = client['database']
-        collection = db.serverrecords
-
-        record_inserted_id = collection.insert_one({"channel_id": channel_id, "channel_name": channel_name, "file_hash": file_hash, "timestamp": timestamp}).inserted_id
-        client.close()
-        return record_inserted_id;
-
     def query(self, hash):
         """
         Return all tuples associated with hash.
@@ -241,7 +224,7 @@ class SQLDatabase(Database):
         """
         return self.query(None)
 
-    def insert_hashes(self, sid, hashes, timestamp, channel_id, channel_name, file_hash):
+    def insert_hashes(self, hashes, timestamp, channel_id, channel_name, file_hash):
         """
         Insert series of hash => record_id, offset
         values into the database.
@@ -255,18 +238,11 @@ class SQLDatabase(Database):
 
         timestamp_scope = 3600
         for hash, offset in hashes:
-            values.append({"hash": hash, "sid": sid, "offset": offset, "timestamp": timestamp})
-        # module_dir = os.path.dirname(__file__)
-        # json_file_path = os.path.join(module_dir, 'sql_statments_config.json')
-        # with open(json_file_path) as json_data_file:
-        #     data = json.load(json_data_file)
-        #     timestamp_scope = data['lastsavedrecord']
-        # with self.cursor() as cur:
-        #     for split_values in grouper(values, 1000):
-        #         cur.executemany(self.INSERT_FINGERPRINT, split_values)
-        #     cur.execute("DELETE FROM fingerprints WHERE " +
-        #                 "timestamp < (UNIX_TIMESTAMP() - {});".format(timestamp_scope))
-        collection.insert_many(values)
+            values.append({"hash": hash, "offset": offset})
+        
+        collection.insert_one({"channel_id": channel_id, "channel_name": channel_name, 
+                                "file_hash": file_hash, "timestamp": timestamp,
+                                "fingerprints": values })
         client.close()
 
     def return_matches(self, hashes, timestamp):
@@ -291,17 +267,25 @@ class SQLDatabase(Database):
         # Get an iteratable of all the hashes we need
         values = mapper.keys()
 
-        with self.cursor() as cur:
-            for split_values in grouper(values, 1000):
-                # Create our IN part of the query
-                query = self.SELECT_MULTIPLE
-                query = query % (lower_bound, upper_bound, ', '.join(['UNHEX(%s)'] * len(split_values)))
+        # with self.cursor() as cur:
+        #     for split_values in grouper(values, 1000):
+        #         Create our IN part of the query
+        #         query = self.SELECT_MULTIPLE
+        #         query = query % (lower_bound, upper_bound, ', '.join(['UNHEX(%s)'] * len(split_values)))
 
-                cur.execute(query ,split_values)
+        #         cur.execute(query ,split_values)
+        client = MongoClient('127.0.0.1', 27017)
+        db = client['database']
+        # db.authenticate(settings.MONGO_USER, settings.MONGO_PASS)
+        collection = db.fingerprints
 
-                for hash, sid, offset in cur:
-                    # (sid, db_offset - record_sampled_offset)
-                    yield (sid, offset - mapper[hash])
+        """SELECT Database.FIELD_HASH, Database.FIELD_RECORD_ID, Database.FIELD_OFFSET
+         FROM ( SELECT Database.FIELD_HASH, Database.FIELD_RECORD_ID, Database.FIELD_OFFSET 
+         FROM FINGERPRINTS_TABLENAME WHERE Database.FIELD_TIMESTAMP BETWEEN lower_bound AND upper_bound) AS T WHERE Database.FIELD_HASH IN (%%s);"""
+
+                # for hash, sid, offset in cur:
+                #     # (sid, db_offset - record_sampled_offset)
+                #     yield (sid, offset - mapper[hash])
 
     def __getstate__(self):
         return (self._options,)
