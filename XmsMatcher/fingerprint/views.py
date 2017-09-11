@@ -12,7 +12,7 @@ from django.http import JsonResponse
 import warnings
 import json
 import os
-from XmsMatcher import celery 
+from XmsMatcher import tasks
 warnings.filterwarnings("ignore")
 
 

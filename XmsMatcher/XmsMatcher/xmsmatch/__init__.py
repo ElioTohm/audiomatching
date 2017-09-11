@@ -33,7 +33,6 @@ class Matcher(object):
         self.limit = self.config.get("fingerprint_limit", None)
         if self.limit == -1:  # for JSON compatibility
             self.limit = None
-        self.get_fingerprinted_records()
 
     def get_fingerprinted_records(self):
         # get records previously indexed
@@ -42,30 +41,6 @@ class Matcher(object):
         for record in self.records:
             record_hash = record[Database.FIELD_FILE_SHA1]
             self.recordhashes_set.add(record_hash)
-
-    def fingerprint_directory(self, filepath, recordslist):
-        # Try to use the maximum amount of processes if not given.
-        for channel_id in recordslist:
-            recordname = decoder.path_to_recordname(filepath + channel_id)
-            record_hash = decoder.unique_hash(filepath + channel_id)
-
-            channel_info_array = channel_id.split("_")
-            channel_id = channel_info_array[1]
-            timestamp = channel_info_array[2]
-            timestamp = timestamp.split(".")
-            timestamp = timestamp[0]
-            channel_name = channel_info_array[0]
-
-            channel_id = channel_id or recordname
-            channel_id, hashes, file_hash = _fingerprint_worker(
-                filepath,
-                self.limit,
-                channel_id=channel_id
-            )
-            sid = self.db.insert_record(channel_id, channel_name, file_hash, timestamp)
-            self.db.set_record_fingerprinted(sid)
-            self.db.insert_hashes(sid, hashes, timestamp, channel_id, channel_name, file_hash)
-            self.get_fingerprinted_records()
 
 
     def fingerprint_file(self, filepath, channel_id=None):
@@ -80,19 +55,13 @@ class Matcher(object):
         channel_name = channel_info_array[0]
 
         channel_id = channel_id or recordname
-        # don't refingerprint already fingerprinted files
-        if record_hash in self.recordhashes_set:
-            print "%s already fingerprinted, continuing..." % channel_id
-        else:
-            channel_id, hashes, file_hash = _fingerprint_worker(
-                filepath,
-                self.limit,
-                channel_id=channel_id
-            )
-            sid = self.db.insert_record(channel_id, channel_name, file_hash, timestamp)
-            self.db.set_record_fingerprinted(sid)
-            self.db.insert_hashes(sid, hashes, timestamp, channel_id, channel_name, file_hash)
-            self.get_fingerprinted_records()
+        channel_id, hashes, file_hash = _fingerprint_worker(
+            filepath,
+            self.limit,
+            channel_id=channel_id
+        )
+        sid = self.db.insert_record(channel_id, channel_name, file_hash, timestamp)
+        self.db.insert_hashes(sid, hashes, timestamp, channel_id, channel_name, file_hash)
 
     def find_matches(self, samples, timestamp, Fs=fingerprint.DEFAULT_FS):
         hashes = fingerprint.fingerprint(samples, Fs=Fs)

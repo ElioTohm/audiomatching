@@ -59,39 +59,6 @@ class SQLDatabase(Database):
     # fields
     FIELD_FINGERPRINTED = "fingerprinted"
 
-    # creates
-    # CREATE_FINGERPRINTS_TABLE = """
-    #     CREATE TABLE IF NOT EXISTS `%s` (
-    #          `%s` binary(10) not null,
-    #          `%s` mediumint unsigned not null,
-    #          `%s` int unsigned not null,
-    #          `%s` int(10),
-    #      INDEX (%s),
-    #      UNIQUE KEY `unique_constraint` (%s, %s, %s),
-    #      FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE
-    # ) ENGINE=INNODB;""" % (
-    #     FINGERPRINTS_TABLENAME, Database.FIELD_HASH,
-    #     Database.FIELD_RECORD_ID, Database.FIELD_OFFSET, Database.FIELD_TIMESTAMP, Database.FIELD_HASH,
-    #     Database.FIELD_RECORD_ID, Database.FIELD_OFFSET, Database.FIELD_HASH,
-    #     Database.FIELD_RECORD_ID, RECORD_TABLE, Database.FIELD_RECORD_ID
-    # )
-
-    # CREATE_RECORDS_TABLE = """
-    #     CREATE TABLE IF NOT EXISTS `%s` (
-    #         `%s` mediumint unsigned not null auto_increment,
-    #         `%s` int(10) not null,
-    #         `%s` varchar(25) ,
-    #         `%s` tinyint default 0,
-    #         `%s` int(10),
-    #         `%s` binary(20) not null,
-    #     PRIMARY KEY (`%s`),
-    #     UNIQUE KEY `%s` (`%s`)
-    # ) ENGINE=INNODB;""" % (
-    #     RECORD_TABLE, Database.FIELD_RECORD_ID, Database.FIELD_CHANNEL_ID, Database.FIELD_CHANNEL_NAME, FIELD_FINGERPRINTED,
-    #     Database.FIELD_TIMESTAMP, Database.FIELD_FILE_SHA1,
-    #     Database.FIELD_RECORD_ID, Database.FIELD_RECORD_ID, Database.FIELD_RECORD_ID,
-    # )
-
     # inserts (ignores duplicates)
     INSERT_FINGERPRINT = """
         INSERT IGNORE INTO %s (%s, %s, %s, %s) values
@@ -159,17 +126,6 @@ class SQLDatabase(Database):
         # the previous process.
         Cursor.clear_cache()
 
-    # def setup(self):
-    #     """
-    #     Creates any non-existing tables required for xmsmatch to function.
-
-    #     This also removes all records that have been added but have no
-    #     fingerprints associated with them.
-    #     """
-    #     with self.cursor() as cur:
-    #         cur.execute(self.CREATE_RECORDS_TABLE)
-    #         cur.execute(self.CREATE_FINGERPRINTS_TABLE)
-    #         cur.execute(self.DELETE_UNFINGERPRINTED)
 
     def empty(self):
         """
@@ -245,18 +201,24 @@ class SQLDatabase(Database):
         """
         client = MongoClient('127.0.0.1', 27017)
         db = client['database']
-        db.authenticate(settings.MONGO_USER, settings.MONGO_PASS)
         collection = db.fingerprints
 
         collection.insert_one((hash, sid, offset, timestamp))
+        client.close()
 
     def insert_record(self, channel_id, channel_name, file_hash, timestamp):
         """
         Inserts record in the database and returns the ID of the inserted record.
         """
-        with self.cursor() as cur:
-            cur.execute(self.INSERT_RECORD, (channel_id, channel_name, file_hash, timestamp))
-            return cur.lastrowid
+        # with self.cursor() as cur:
+            # cur.execute(self.INSERT_RECORD, (channel_id, channel_name, file_hash, timestamp))
+        client = MongoClient('127.0.0.1', 27017)
+        db = client['database']
+        collection = db.serverrecords
+
+        record_inserted_id = collection.insert_one({"channel_id": channel_id, "channel_name": channel_name, "file_hash": file_hash, "timestamp": timestamp}).inserted_id
+        client.close()
+        return record_inserted_id;
 
     def query(self, hash):
         """
@@ -287,21 +249,22 @@ class SQLDatabase(Database):
         values = []
         client = MongoClient('127.0.0.1', 27017)
         db = client['database']
-        db.authenticate(settings.MONGO_USER, settings.MONGO_PASS)
+        # db.authenticate(settings.MONGO_USER, settings.MONGO_PASS)
         collection = db.fingerprints
 
 
         timestamp_scope = 3600
         for hash, offset in hashes:
-            values.append((hash, sid, offset, timestamp))
-        module_dir = os.path.dirname(__file__)
-        json_file_path = os.path.join(module_dir, 'sql_statments_config.json')
-        with open(json_file_path) as json_data_file:
-            data = json.load(json_data_file)
-            timestamp_scope = data['lastsavedrecord']
+            values.append({"hash": hash, "sid": sid, "offset": offset, "timestamp": timestamp})
+            print "{} {} {} {}".format(hash, sid, offset, timestamp)
+        # module_dir = os.path.dirname(__file__)
+        # json_file_path = os.path.join(module_dir, 'sql_statments_config.json')
+        # with open(json_file_path) as json_data_file:
+        #     data = json.load(json_data_file)
+        #     timestamp_scope = data['lastsavedrecord']
 
         collection.insert_many(values)
-
+        client.close()
         # with self.cursor() as cur:
         #     for split_values in grouper(values, 1000):
         #         cur.executemany(self.INSERT_FINGERPRINT, split_values)
