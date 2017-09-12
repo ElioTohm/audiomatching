@@ -1,4 +1,4 @@
-from XmsMatcher.xmsmatch.database import get_database, Database
+from xmsmatch.database import get_database, Database
 import decoder as decoder
 import fingerprint
 import multiprocessing.dummy
