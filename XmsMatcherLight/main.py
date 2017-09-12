@@ -79,19 +79,21 @@ def match(clientrecording):
         djv = Matcher(config)
         result = list()
 
-        client_file_path = os.path.join(module_dir, 'clientrecord/' + str(clientrecording))
+        client_file_path = os.path.join(module_dir, 'clientrecord/' + clientrecording)
+        print client_file_path
         record = djv.recognize(FileRecognizer, client_file_path)
-        client_id = str(clientrecording).split("_")
-
-        # remove file matched
-        print result
         os.unlink(client_file_path)
+        return record
+        # client_id = str(clientrecording).split("_")
 
-        if record is None:
-            timestamp = str(client_id[2]).split(".")
-            mongo.db.records.insert_one({'none':client_file_path, 'client_id': client_id[1], 'timestamp': timestamp[0], 'channel_name':'Muted', 'confidence':'Muted'})
-        else:
-            mongo.db.records.insert_one(record)
+        # if record is None:
+        #     timestamp = str(client_id[2]).split(".")
+        #     result.append({'none':client_file_path, 'client_id': client_id[1],
+        #                    'timestamp': timestamp[0], 'channel_name':'Muted', 'confidence':'Muted'})
+        # else:
+        #     result.append(record)
+        
+        # mongo.records.insert_many(result)
 
         return "done"
 
@@ -132,8 +134,6 @@ class Todo(Resource):
         return task, 201
 
 
-# TodoList
-# shows a list of all todos, and lets you POST to add new tasks
 class TodoList(Resource):
     def get(self):
         return TODOS
@@ -173,8 +173,9 @@ class MatchRequest (Resource) :
                 clientrecording.save(os.path.join(module_dir +'/clientrecord/', filename))
         
         for clientrecording in request.files.getlist('client_record'):
-            match.apply_async((filename,), countdown=30)
-
+            # match.apply_async((clientrecording.filename,), countdown=30)
+            match.delay(clientrecording.filename)
+        
         return 200
 
 ##
