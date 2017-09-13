@@ -1,18 +1,12 @@
+'''
+    mongodb wraper
+'''
 from __future__ import absolute_import
 from itertools import izip_longest
-import Queue
-
-
-import MySQLdb as mysql
-from MySQLdb.cursors import DictCursor
-
-from xmsmatch.database import Database
-
 import json
 import os
-
+import pprint
 from pymongo import MongoClient
-from django.conf import settings
 
 class MongoDatabase():
     """
@@ -50,75 +44,19 @@ class MongoDatabase():
         where fingerprints.hash = "08d3c833b71c60a7b620322ac0c0aba7bf5a3e73";
     """
 
-    type = "mysql"
-
     # tables
+    FIELD_FILE_SHA1 = 'file_sha1'
+    FIELD_RECORD_ID = 'record_id'
+    FIELD_CHANNEL_ID = 'channel_id'
+    FIELD_OFFSET = 'offset'
+    FIELD_HASH = 'hash'
+    FIELD_TIMESTAMP = 'timestamp'
+    FIELD_CHANNEL_NAME = 'channel_name'
     FINGERPRINTS_TABLENAME = "fingerprints"
     RECORD_TABLE = "records"
 
     # fields
     FIELD_FINGERPRINTED = "fingerprinted"
-
-    # inserts (ignores duplicates)
-    INSERT_FINGERPRINT = """
-        INSERT IGNORE INTO %s (%s, %s, %s, %s) values
-            (UNHEX(%%s), %%s, %%s, %%s);
-    """ % (FINGERPRINTS_TABLENAME, Database.FIELD_HASH, Database.FIELD_RECORD_ID, Database.FIELD_OFFSET, Database.FIELD_TIMESTAMP)
-
-    # selects
-    SELECT = """
-        SELECT %s, %s FROM %s WHERE %s = UNHEX(%%s);
-    """ % (Database.FIELD_RECORD_ID, Database.FIELD_OFFSET, FINGERPRINTS_TABLENAME, Database.FIELD_HASH)
-
-    # use only chunk of data with the correspongig timestamp
-    # have to send timestamp programatically
-    SELECT_MULTIPLE = """
-        SELECT HEX(%s), %s, %s FROM ( SELECT %s, %s, %s FROM %s WHERE %s BETWEEN %%s AND %%s) AS T WHERE %s IN (%%s);
-    """ % (Database.FIELD_HASH, Database.FIELD_RECORD_ID, 
-            Database.FIELD_OFFSET, Database.FIELD_HASH, Database.FIELD_RECORD_ID, Database.FIELD_OFFSET,
-           FINGERPRINTS_TABLENAME, Database.FIELD_TIMESTAMP, Database.FIELD_HASH)
-
-    SELECT_ALL = """
-        SELECT %s, %s FROM %s;
-    """ % (Database.FIELD_RECORD_ID, Database.FIELD_OFFSET, FINGERPRINTS_TABLENAME)
-
-    SELECT_RECORD = """
-        SELECT %s, %s, HEX(%s) as %s FROM %s WHERE %s = %%s;
-    """ % (Database.FIELD_CHANNEL_ID, Database.FIELD_CHANNEL_NAME, Database.FIELD_FILE_SHA1, Database.FIELD_FILE_SHA1, RECORD_TABLE, Database.FIELD_RECORD_ID)
-
-    SELECT_NUM_FINGERPRINTS = """
-        SELECT COUNT(*) as n FROM %sx`
-    """ % (FINGERPRINTS_TABLENAME)
-
-    SELECT_UNIQUE_RECORD_IDS = """
-        SELECT COUNT(DISTINCT %s) as n FROM %s WHERE %s = 1;
-    """ % (Database.FIELD_RECORD_ID, RECORD_TABLE, FIELD_FINGERPRINTED)
-
-    SELECT_RECORDS = """
-        SELECT %s, %s, HEX(%s) as %s FROM %s WHERE %s = 1;
-    """ % (Database.FIELD_RECORD_ID, Database.FIELD_CHANNEL_ID, Database.FIELD_FILE_SHA1, Database.FIELD_FILE_SHA1,
-           RECORD_TABLE, FIELD_FINGERPRINTED)
-
-    # drops
-    DROP_FINGERPRINTS = "DROP TABLE IF EXISTS %s;" % FINGERPRINTS_TABLENAME
-    DROP_RECORDS = "DROP TABLE IF EXISTS %s;" % RECORD_TABLE
-
-    # update
-    UPDATE_RECORD_FINGERPRINTED = """
-        UPDATE %s SET %s = 1 WHERE %s = %%s
-    """ % (RECORD_TABLE, FIELD_FINGERPRINTED, Database.FIELD_RECORD_ID)
-
-    # delete
-    DELETE_UNFINGERPRINTED = """
-        DELETE FROM %s WHERE %s = 0;
-    """ % (RECORD_TABLE, FIELD_FINGERPRINTED)
-
-
-    # def get_iterable_kv_pairs(self):
-    #     """
-    #     Returns all tuples in database.
-    #     """
-    #     return self.query(None)
 
     def insert_hashes(self, hashes, timestamp, channel_id, channel_name, file_hash):
         """
@@ -129,9 +67,9 @@ class MongoDatabase():
         for hash, offset in hashes:
             values.append({"hash": hash, "offset": offset})
         
-        return {"channel_id": channel_id, "channel_name": channel_name, 
-                                "file_hash": file_hash, "timestamp": timestamp,
-                                "fingerprints": values }
+        return {self.FIELD_CHANNEL_ID: channel_id, self.FIELD_CHANNEL_NAME: channel_name, 
+                                self.FIELD_FILE_SHA1: file_hash, self.FIELD_TIMESTAMP: int(timestamp),
+                                self.FINGERPRINTS_TABLENAME: values }
 
     def return_matches(self, hashes, timestamp):
         """
@@ -149,16 +87,53 @@ class MongoDatabase():
 
         # Create a dictionary of hash => offset pairs for later lookups
         mapper = {}
+
         for hash, offset in hashes:
-            mapper[hash.upper()] = offset
+            pprint.pprint(hash)
+            pprint.pprint(offset)
+            # mapper[hash.upper()] = offset
 
+        client = MongoClient()
+        db = client.database
+
+        matches = db.fingerprints.find({
+                "fingerprints" : {
+                    "$elemMatch": {
+                        "hash": {
+                            "$in":["d2ea889101155d3100c5"]
+                        }
+                    }
+                }
+            })
+
+        pipeline = [
+            {
+                '$match': {
+                        'timestamp' : { '$gte': 1, '$lt': 3 }
+                    }
+            },
+            { '$project': {
+                '_id': 0,
+                'timestamp': 1,
+                'channel_name': 1,
+                'hit': { '$setIntersection': [ '$fingerprints.hash', ["7e7c85a1430d043e58ce", "2a9e6c4a0b80a06fb4b2"] ] }
+            }}
+        ]
+
+        matches = db.fingerprints.aggregate(pipeline)
+        for match in matches:
+            pprint.pprint(match)
+        
         # Get an iteratable of all the hashes we need
-        values = mapper.keys()
+        # values = mapper.keys()
 
-        # mongo.fingerprints.Find()
-        # for hash, sid, offset in cur:
-            # (sid, db_offset - record_sampled_offset)
-            # yield (sid, offset - mapper[hash])
+        # # mongo.fingerprints.Find()
+        # for matche in matches:
+        #     pprint.pprint(matche)
+        
+
+        # for hash, sid, offset in matches:
+        #     yield (sid, offset - mapper[hash])
 
 
 

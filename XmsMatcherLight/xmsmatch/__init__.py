@@ -1,5 +1,4 @@
-from xmsmatch.database import Database
-from xmsmatch.database_mongo import MongoDatabase as db 
+import xmsmatch.database_mongo as database_mongo
 import decoder as decoder
 import fingerprint
 import multiprocessing.dummy
@@ -24,9 +23,7 @@ class Matcher(object):
         self.config = config
 
         # initialize db
-        # db_cls = get_database(config.get("database_type", None))
-
-        # self.db = db_cls(**config.get("database", {}))
+        self.db = database_mongo.MongoDatabase()
 
         # if we should limit seconds fingerprinted,
         # None|-1 means use entire track
@@ -52,11 +49,11 @@ class Matcher(object):
             self.limit,
             channel_id=channel_id
         )
-        return db.insert_hashes(hashes, timestamp, channel_id, channel_name, file_hash)
+        return self.db.insert_hashes(hashes, timestamp, channel_id, channel_name, file_hash)
 
     def find_matches(self, samples, timestamp, Fs=fingerprint.DEFAULT_FS):
         hashes = fingerprint.fingerprint(samples, Fs=Fs)
-        return db.return_matches(hashes, timestamp)
+        return self.db.return_matches(hashes, timestamp)
 
     def align_matches(self, matches, timestamp, client_id):
         """
@@ -110,7 +107,7 @@ class Matcher(object):
             Matcher.OFFSET : int(largest),
             Matcher.OFFSET_SECS : nseconds,
             # Database.FIELD_FILE_SHA1 : record.get(Database.FIELD_FILE_SHA1, None),
-            Database.FIELD_TIMESTAMP: timestamp,
+            self.db.FIELD_TIMESTAMP: timestamp,
             'client_id' : client_id
             }
         return record

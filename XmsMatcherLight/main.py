@@ -12,6 +12,8 @@ import os
 import datetime
 import pprint
 from werkzeug.utils import secure_filename
+from xmsmatch import Matcher
+from xmsmatch.recognize import FileRecognizer
 
 def make_celery(app):
 
@@ -42,9 +44,6 @@ app.config.update(
 mongo = PyMongo(app)
 
 celery = make_celery(app)
-
-from xmsmatch import Matcher
-from xmsmatch.recognize import FileRecognizer
 
 @celery.task()
 def fingerprint(mp3file):
@@ -83,8 +82,10 @@ def match(clientrecording):
         client_file_path = os.path.join(module_dir, 'clientrecord/' + clientrecording)
         print client_file_path
         record = djv.recognize(FileRecognizer, client_file_path)
+
+        pprint(record)
+        
         os.unlink(client_file_path)
-        return record
         # client_id = str(clientrecording).split("_")
 
         # if record is None:
