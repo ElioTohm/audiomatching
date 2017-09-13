@@ -14,7 +14,7 @@ import os
 from pymongo import MongoClient
 from django.conf import settings
 
-class SQLDatabase(Database):
+class MongoDatabase():
     """
     Queries:
 
@@ -114,26 +114,11 @@ class SQLDatabase(Database):
     """ % (RECORD_TABLE, FIELD_FINGERPRINTED)
 
 
-    # def query(self, hash):
+    # def get_iterable_kv_pairs(self):
     #     """
-    #     Return all tuples associated with hash.
-
-    #     If hash is None, returns all entries in the
-    #     database (be careful with that one!).
+    #     Returns all tuples in database.
     #     """
-    #     # select all if no key
-    #     query = self.SELECT_ALL if hash is None else self.SELECT
-
-    #     with self.cursor() as cur:
-    #         cur.execute(query)
-    #         for sid, offset in cur:
-    #             yield (sid, offset)
-
-    def get_iterable_kv_pairs(self):
-        """
-        Returns all tuples in database.
-        """
-        return self.query(None)
+    #     return self.query(None)
 
     def insert_hashes(self, hashes, timestamp, channel_id, channel_name, file_hash):
         """

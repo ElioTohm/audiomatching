@@ -68,12 +68,12 @@ class Database(object):
     #     """
     #     pass
 
-    @abc.abstractmethod
-    def get_iterable_kv_pairs(self):
-        """
-        Returns all fingerprints in the database.
-        """
-        pass
+    # @abc.abstractmethod
+    # def get_iterable_kv_pairs(self):
+    #     """
+    #     Returns all fingerprints in the database.
+    #     """
+    #     pass
 
     @abc.abstractmethod
     def insert_hashes(self, hashes, timestamp, channel_id, channel_name, file_hash):
@@ -102,19 +102,6 @@ class Database(object):
         offset_difference: (offset - database_offset)
         """
         pass
-
-
-def get_database(database_type=None):
-    # Default to using the mysql database
-    database_type = database_type or "mysql"
-    # Lower all the input.
-    database_type = database_type.lower()
-
-    for db_cls in Database.__subclasses__():
-        if db_cls.type == database_type:
-            return db_cls
-
-    raise TypeError("Unsupported database type supplied.")
 
 
 # Import our default database handler
