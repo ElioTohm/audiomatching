@@ -113,99 +113,21 @@ class SQLDatabase(Database):
         DELETE FROM %s WHERE %s = 0;
     """ % (RECORD_TABLE, FIELD_FINGERPRINTED)
 
-    def __init__(self, **options):
-        super(SQLDatabase, self).__init__()
-        self.cursor = cursor_factory(**options)
-        self._options = options
 
-    def after_fork(self):
-        # Clear the cursor cache, we don't want any stale connections from
-        # the previous process.
-        Cursor.clear_cache()
+    # def query(self, hash):
+    #     """
+    #     Return all tuples associated with hash.
 
+    #     If hash is None, returns all entries in the
+    #     database (be careful with that one!).
+    #     """
+    #     # select all if no key
+    #     query = self.SELECT_ALL if hash is None else self.SELECT
 
-    def empty(self):
-        """
-        Drops tables created by xmsmatch and then creates them again
-        by calling `SQLDatabase.setup`.
-
-        .. warning:
-            This will result in a loss of data
-        """
-        with self.cursor() as cur:
-            cur.execute(self.DROP_FINGERPRINTS)
-            cur.execute(self.DROP_RECORDS)
-
-        self.setup()
-
-    def delete_unfingerprinted_records(self):
-        """
-        Removes all records that have no fingerprints associated with them.
-        """
-        with self.cursor() as cur:
-            cur.execute(self.DELETE_UNFINGERPRINTED)
-
-    def get_num_records(self):
-        """
-        Returns number of records the database has fingerprinted.
-        """
-        with self.cursor() as cur:
-            cur.execute(self.SELECT_UNIQUE_RECORD_IDS)
-
-            for count, in cur:
-                return count
-            return 0
-
-    def get_num_fingerprints(self):
-        """
-        Returns number of fingerprints the database has fingerprinted.
-        """
-        with self.cursor() as cur:
-            cur.execute(self.SELECT_NUM_FINGERPRINTS)
-
-            for count, in cur:
-                return count
-            return 0
-
-    def set_record_fingerprinted(self, sid):
-        """
-        Set the fingerprinted flag to TRUE (1) once a record has been completely
-        fingerprinted in the database.
-        """
-        with self.cursor() as cur:
-            cur.execute(self.UPDATE_RECORD_FINGERPRINTED, (sid,))
-
-    def get_records(self):
-        """
-        Return records that have the fingerprinted flag set TRUE (1).
-        """
-        with self.cursor(cursor_type=DictCursor) as cur:
-            cur.execute(self.SELECT_RECORDS)
-            for row in cur:
-                yield row
-
-    def get_record_by_id(self, sid):
-        """
-        Returns record by its ID.
-        """
-        with self.cursor(cursor_type=DictCursor) as cur:
-            cur.execute(self.SELECT_RECORD, (sid,))
-            return cur.fetchone()
-
-    def query(self, hash):
-        """
-        Return all tuples associated with hash.
-
-        If hash is None, returns all entries in the
-        database (be careful with that one!).
-        """
-        # select all if no key
-        query = self.SELECT_ALL if hash is None else self.SELECT
-
-        with self.cursor() as cur:
-            cur.execute(query)
-            for sid, offset in cur:
-                yield (sid, offset)
+    #     with self.cursor() as cur:
+    #         cur.execute(query)
+    #         for sid, offset in cur:
+    #             yield (sid, offset)
 
     def get_iterable_kv_pairs(self):
         """
@@ -248,32 +170,11 @@ class SQLDatabase(Database):
         # Get an iteratable of all the hashes we need
         values = mapper.keys()
 
-        # with self.cursor() as cur:
-        #     for split_values in grouper(values, 1000):
-        #         Create our IN part of the query
-        #         query = self.SELECT_MULTIPLE
-        #         query = query % (lower_bound, upper_bound, ', '.join(['UNHEX(%s)'] * len(split_values)))
+        # mongo.fingerprints.Find()
+        # for hash, sid, offset in cur:
+            # (sid, db_offset - record_sampled_offset)
+            # yield (sid, offset - mapper[hash])
 
-        #         cur.execute(query ,split_values)
-        # client = MongoClient('127.0.0.1', 27017)
-        # db = client['database']
-        # # db.authenticate(settings.MONGO_USER, settings.MONGO_PASS)
-        # collection = db.fingerprints
-
-        """SELECT Database.FIELD_HASH, Database.FIELD_RECORD_ID, Database.FIELD_OFFSET
-         FROM ( SELECT Database.FIELD_HASH, Database.FIELD_RECORD_ID, Database.FIELD_OFFSET 
-         FROM FINGERPRINTS_TABLENAME WHERE Database.FIELD_TIMESTAMP BETWEEN lower_bound AND upper_bound) AS T WHERE Database.FIELD_HASH IN (%%s);"""
-
-                # for hash, sid, offset in cur:
-                #     # (sid, db_offset - record_sampled_offset)
-                #     yield (sid, offset - mapper[hash])
-
-    def __getstate__(self):
-        return (self._options,)
-
-    def __setstate__(self, state):
-        self._options, = state
-        self.cursor = cursor_factory(**self._options)
 
 
 def grouper(iterable, n, fillvalue=None):
@@ -282,59 +183,3 @@ def grouper(iterable, n, fillvalue=None):
             in izip_longest(fillvalue=fillvalue, *args))
 
 
-def cursor_factory(**factory_options):
-    def cursor(**options):
-        options.update(factory_options)
-        return Cursor(**options)
-    return cursor
-
-
-class Cursor(object):
-    """
-    Establishes a connection to the database and returns an open cursor.
-
-
-    ```python
-    # Use as context manager
-    with Cursor() as cur:
-        cur.execute(query)
-    ```
-    """
-    _cache = Queue.Queue(maxsize=5)
-
-    def __init__(self, cursor_type=mysql.cursors.Cursor, **options):
-        super(Cursor, self).__init__()
-
-        try:
-            conn = self._cache.get_nowait()
-        except Queue.Empty:
-            conn = mysql.connect(**options)
-        else:
-            # Ping the connection before using it from the cache.
-            conn.ping(True)
-
-        self.conn = conn
-        self.conn.autocommit(False)
-        self.cursor_type = cursor_type
-
-    @classmethod
-    def clear_cache(cls):
-        cls._cache = Queue.Queue(maxsize=5)
-
-    def __enter__(self):
-        self.cursor = self.conn.cursor(self.cursor_type)
-        return self.cursor
-
-    def __exit__(self, extype, exvalue, traceback):
-        # if we had a MySQL related error we try to rollback the cursor.
-        if extype is mysql.MySQLError:
-            self.cursor.rollback()
-
-        self.cursor.close()
-        self.conn.commit()
-
-        # Put it back on the queue
-        try:
-            self._cache.put_nowait(self.conn)
-        except Queue.Full:
-            self.conn.close()

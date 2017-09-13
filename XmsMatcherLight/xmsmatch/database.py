@@ -19,110 +19,54 @@ class Database(object):
     def __init__(self):
         super(Database, self).__init__()
 
-    def before_fork(self):
-        """
-        Called before the database instance is given to the new process
-        """
-        pass
-
-    def after_fork(self):
-        """
-        Called after the database instance has been given to the new process
-
-        This will be called in the new process.
-        """
-        pass
-
-    def setup(self):
-        """
-        Called on creation or shortly afterwards.
-        """
-        pass
-
-    @abc.abstractmethod
-    def empty(self):
-        """
-        Called when the database should be cleared of all data.
-        """
-        pass
-
-    @abc.abstractmethod
-    def delete_unfingerprinted_records(self):
-        """
-        Called to remove any record entries that do not have any fingerprints
-        associated with them.
-        """
-        pass
-
-    @abc.abstractmethod
-    def get_num_records(self):
-        """
-        Returns the amount of records in the database.
-        """
-        pass
-
-    @abc.abstractmethod
-    def get_num_fingerprints(self):
-        """
-        Returns the number of fingerprints in the database.
-        """
-        pass
-
-    @abc.abstractmethod
-    def set_record_fingerprinted(self, sid):
-        """
-        Sets a specific record as having all fingerprints in the database.
-
-        sid: Song identifier
-        """
-        pass
-
-    @abc.abstractmethod
-    def get_records(self):
-        """
-        Returns all fully fingerprinted records in the database.
-        """
-        pass
-
-    @abc.abstractmethod
-    def get_record_by_id(self, sid):
-        """
-        Return a record by its identifier
-
-        sid: Song identifier
-        """
-        pass
-
     # @abc.abstractmethod
-    # def insert(self, hash, sid, offset, timestamp):
+    # def get_num_records(self):
     #     """
-    #     Inserts a single fingerprint into the database.
-
-    #       hash: Part of a sha1 hash, in hexadecimal format
-    #        sid: Song identifier this fingerprint is off
-    #     offset: The offset this hash is from
+    #     Returns the amount of records in the database.
     #     """
     #     pass
 
     # @abc.abstractmethod
-    # def insert_record(self, channel_id, channel_name, timestamp):
+    # def get_num_fingerprints(self):
     #     """
-    #     Inserts a record name into the database, returns the new
-    #     identifier of the record.
-
-    #     channel_id: The name of the record.
+    #     Returns the number of fingerprints in the database.
     #     """
     #     pass
 
-    @abc.abstractmethod
-    def query(self, hash):
-        """
-        Returns all matching fingerprint entries associated with
-        the given hash as parameter.
+    # @abc.abstractmethod
+    # def set_record_fingerprinted(self, sid):
+    #     """
+    #     Sets a specific record as having all fingerprints in the database.
 
-        hash: Part of a sha1 hash, in hexadecimal format
-        """
-        pass
+    #     sid: Song identifier
+    #     """
+    #     pass
+
+    # @abc.abstractmethod
+    # def get_records(self):
+    #     """
+    #     Returns all fully fingerprinted records in the database.
+    #     """
+    #     pass
+
+    # @abc.abstractmethod
+    # def get_record_by_id(self, sid):
+    #     """
+    #     Return a record by its identifier
+
+    #     sid: Song identifier
+    #     """
+    #     pass
+
+    # @abc.abstractmethod
+    # def query(self, hash):
+    #     """
+    #     Returns all matching fingerprint entries associated with
+    #     the given hash as parameter.
+
+    #     hash: Part of a sha1 hash, in hexadecimal format
+    #     """
+    #     pass
 
     @abc.abstractmethod
     def get_iterable_kv_pairs(self):

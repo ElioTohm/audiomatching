@@ -9,8 +9,6 @@ from bson import Binary, Code
 from bson.json_util import dumps, loads
 import json
 import os
-from xmsmatch import Matcher
-from xmsmatch.recognize import FileRecognizer
 import datetime
 import pprint
 from werkzeug.utils import secure_filename
@@ -44,6 +42,9 @@ app.config.update(
 mongo = PyMongo(app)
 
 celery = make_celery(app)
+
+from xmsmatch import Matcher
+from xmsmatch.recognize import FileRecognizer
 
 @celery.task()
 def fingerprint(mp3file):

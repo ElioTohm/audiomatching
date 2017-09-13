@@ -3,6 +3,6 @@
         "host": "127.0.0.1",
         "user": "xmsmatcher",
         "passwd": "123123", 
-        "db": "xmsmatcher_db"
+        "db": "database"
     }
 }

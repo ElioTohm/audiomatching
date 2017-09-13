@@ -94,21 +94,21 @@ class MicrophoneRecognizer(BaseRecognizer):
         self.stream = None
         self.recorded = True
 
-    def recognize_recording(self):
-        if not self.recorded:
-            raise NoRecordingError("Recording was not complete/begun")
-        return self._recognize(*self.data)
+    # def recognize_recording(self):
+    #     if not self.recorded:
+    #         raise NoRecordingError("Recording was not complete/begun")
+    #     return self._recognize(*self.data)
 
-    def get_recorded_time(self):
-        return len(self.data[0]) / self.rate
+    # def get_recorded_time(self):
+    #     return len(self.data[0]) / self.rate
 
-    def recognize(self, seconds=10):
-        self.start_recording()
-        for i in range(0, int(self.samplerate / self.chunksize
-                              * seconds)):
-            self.process_recording()
-        self.stop_recording()
-        return self.recognize_recording()
+    # def recognize(self, seconds=10):
+    #     self.start_recording()
+    #     for i in range(0, int(self.samplerate / self.chunksize
+    #                           * seconds)):
+    #         self.process_recording()
+    #     self.stop_recording()
+    #     return self.recognize_recording()
 
 
 class NoRecordingError(Exception):
