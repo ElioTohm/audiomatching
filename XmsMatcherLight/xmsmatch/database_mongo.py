@@ -55,7 +55,7 @@ class MongoDatabase():
     FINGERPRINTS_TABLENAME = "fingerprints"
     RECORD_TABLE = "records"
     TSI_BOUND = 15
-    LAST_SAVED_RECORD = 1200
+    LASTSAVEDRECORD = 1200
 
     # fields
     FIELD_FINGERPRINTED = "fingerprinted"
@@ -78,13 +78,14 @@ class MongoDatabase():
         Return the (record_id, offset_diff) tuples associated with
         a list of (sha1, sample_offset) values.
         """
+        lower_bound = timestamp - self.TSI_BOUND
+        upper_bound = timestamp + self.TSI_BOUND
+
         # Create a dictionary of hash => offset pairs for later lookups
         hashlist = list()
-        mapper = {}
 
         for hash, offset in hashes:
             hashlist.append(hash)
-            mapper[hash.upper()] = offset
         
 
         client = MongoClient()
@@ -92,14 +93,13 @@ class MongoDatabase():
 
         pipeline = [
             {'$match': {
-                'timestamp': {'$gte': self.TSI_BOUND, '$lt': self.TSI_BOUND}
+                'timestamp': {'$gte': lower_bound, '$lt': upper_bound}
                 }
             },
             {'$project': {
                 '_id': 0,
-                self.FIELD_TIMESTAMP: 1,
-                self.FIELD_CHANNEL_NAME: 1,
                 self.FIELD_CHANNEL_ID: 1,
+                self.FIELD_TIMESTAMP: 1,
                 'match': {'$setIntersection': [hashlist, '$fingerprints.hash']},              
                 }
             },
@@ -111,10 +111,9 @@ class MongoDatabase():
         ]
 
         matches = db.fingerprints.aggregate(pipeline)
-        # with open('test1.json','wb+') as f:
-        for hash, sid, offset in matches:
-            pprint.pprint((sid, offset - mapper[hash]))
-            # yield (sid, offset - mapper[hash])
+        with open('test1.json','wb+') as f:
+            for match in matches:
+                f.write(json.dumps(match))
 
 
 
