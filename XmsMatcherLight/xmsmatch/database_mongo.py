@@ -54,6 +54,8 @@ class MongoDatabase():
     FIELD_CHANNEL_NAME = 'channel_name'
     FINGERPRINTS_TABLENAME = "fingerprints"
     RECORD_TABLE = "records"
+    TSI_BOUND = 15
+    LAST_SAVED_RECORD = 1200
 
     # fields
     FIELD_FINGERPRINTED = "fingerprinted"
@@ -76,46 +78,43 @@ class MongoDatabase():
         Return the (record_id, offset_diff) tuples associated with
         a list of (sha1, sample_offset) values.
         """
-        # Take the timestamp difference fromt he sql_statment_config.json file
-        module_dir = os.path.dirname(__file__)  # get current directory
-        json_file_path = os.path.join(module_dir, 'sql_statments_config.json')
-        print module_dir
-        with open(json_file_path) as json_data_file:
-            data = json.load(json_data_file)
-        lower_bound = timestamp - data["timestamp_interval"]["lower_bound"]
-        upper_bound = timestamp + data["timestamp_interval"]["upper_bound"]
-
         # Create a dictionary of hash => offset pairs for later lookups
+        hashlist = list()
         mapper = {}
 
         for hash, offset in hashes:
-            pprint.pprint(hash)
-            pprint.pprint(offset)
-            # mapper[hash.upper()] = offset
+            hashlist.append(hash)
+            mapper[hash.upper()] = offset
+        
 
         client = MongoClient()
         db = client.database
 
         pipeline = [
             {'$match': {
-                'timestamp': {'$gte': 1, '$lt': 3}
+                'timestamp': {'$gte': self.TSI_BOUND, '$lt': self.TSI_BOUND}
                 }
             },
             {'$project': {
                 '_id': 0,
-                'timestamp': 1,
-                'channel_name': 1,
-                'hit': {'$setIntersection': [
-                    '$fingerprints.hash',
-                    ["7e7c85a1430d043e58ce", "2a9e6c4a0b80a06fb4b2"]
-                    ]}
+                self.FIELD_TIMESTAMP: 1,
+                self.FIELD_CHANNEL_NAME: 1,
+                self.FIELD_CHANNEL_ID: 1,
+                'match': {'$setIntersection': [hashlist, '$fingerprints.hash']},              
                 }
+            },
+            {
+              '$redact': {
+                '$cond': [{ '$lt': [ { '$size': '$match' }, len(hashlist)/2 ] },'$$PRUNE','$$KEEP']
+              }
             }
         ]
 
         matches = db.fingerprints.aggregate(pipeline)
-        for match in matches:
-            pprint.pprint(match)
+        # with open('test1.json','wb+') as f:
+        for hash, sid, offset in matches:
+            pprint.pprint((sid, offset - mapper[hash]))
+            # yield (sid, offset - mapper[hash])
 
 
 
