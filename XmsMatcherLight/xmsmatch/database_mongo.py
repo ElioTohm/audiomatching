@@ -66,10 +66,10 @@ class MongoDatabase():
         values = []
         for hash, offset in hashes:
             values.append({"hash": hash, "offset": offset})
-        
-        return {self.FIELD_CHANNEL_ID: channel_id, self.FIELD_CHANNEL_NAME: channel_name, 
-                                self.FIELD_FILE_SHA1: file_hash, self.FIELD_TIMESTAMP: int(timestamp),
-                                self.FINGERPRINTS_TABLENAME: values }
+
+        return {self.FIELD_CHANNEL_ID: channel_id, self.FIELD_CHANNEL_NAME: channel_name,
+                self.FIELD_FILE_SHA1: file_hash, self.FIELD_TIMESTAMP: int(timestamp),
+                self.FINGERPRINTS_TABLENAME: values}
 
     def return_matches(self, hashes, timestamp):
         """
