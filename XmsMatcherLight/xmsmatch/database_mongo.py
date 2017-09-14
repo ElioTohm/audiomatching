@@ -96,44 +96,26 @@ class MongoDatabase():
         client = MongoClient()
         db = client.database
 
-        matches = db.fingerprints.find({
-                "fingerprints" : {
-                    "$elemMatch": {
-                        "hash": {
-                            "$in":["d2ea889101155d3100c5"]
-                        }
-                    }
-                }
-            })
-
         pipeline = [
-            {
-                '$match': {
-                        'timestamp' : { '$gte': 1, '$lt': 3 }
-                    }
+            {'$match': {
+                'timestamp': {'$gte': 1, '$lt': 3}
+                }
             },
-            { '$project': {
+            {'$project': {
                 '_id': 0,
                 'timestamp': 1,
                 'channel_name': 1,
-                'hit': { '$setIntersection': [ '$fingerprints.hash', ["7e7c85a1430d043e58ce", "2a9e6c4a0b80a06fb4b2"] ] }
-            }}
+                'hit': {'$setIntersection': [
+                    '$fingerprints.hash',
+                    ["7e7c85a1430d043e58ce", "2a9e6c4a0b80a06fb4b2"]
+                    ]}
+                }
+            }
         ]
 
         matches = db.fingerprints.aggregate(pipeline)
         for match in matches:
             pprint.pprint(match)
-        
-        # Get an iteratable of all the hashes we need
-        # values = mapper.keys()
-
-        # # mongo.fingerprints.Find()
-        # for matche in matches:
-        #     pprint.pprint(matche)
-        
-
-        # for hash, sid, offset in matches:
-        #     yield (sid, offset - mapper[hash])
 
 
 

@@ -43,6 +43,3 @@ class FileRecognizer(BaseRecognizer):
     def recognize(self, filename):
         return self.recognize_file(filename)
 
-
-class NoRecordingError(Exception):
-    pass
