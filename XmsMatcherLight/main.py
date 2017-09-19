@@ -38,7 +38,8 @@ api = Api(app)
 app.config.update(
     CELERY_BROKER_URL='pyamqp://xms:987456321rabbitmq@127.0.0.1:5672/',
     CELERY_RESULT_BACKEND='mongodb://127.0.0.1/celery',
-    MONGO_DBNAME='database'
+    MONGO_DBNAME='database',
+    MONGO_CONNECT=False
 )
 
 mongo = PyMongo(app)
@@ -61,6 +62,9 @@ def fingerprint(mp3file):
         djv = Matcher(config)
 
         mongo.db.fingerprints.insert_one(djv.fingerprint_file(module_dir + '/mp3/' + mp3file, mp3file))
+        
+        # delete file after fingerprinting
+        os.unlink(module_dir + '/mp3/' + mp3file)
 
         return "done"
 

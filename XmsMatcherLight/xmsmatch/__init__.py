@@ -140,8 +140,6 @@ def _fingerprint_worker(filename, limit=None, channel_id=None):
                                                  filename))
         result |= set(hashes)
 
-        # delete file after fingerprinting
-        os.unlink(filename)
 
     return channel_id, result, file_hash
 
