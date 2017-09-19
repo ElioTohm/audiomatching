@@ -80,11 +80,10 @@ def match(clientrecording):
         result = list()
 
         client_file_path = os.path.join(module_dir, 'clientrecord/' + clientrecording)
-        print client_file_path
         record = djv.recognize(FileRecognizer, client_file_path)
 
         pprint(record)
-        
+
         os.unlink(client_file_path)
         # client_id = str(clientrecording).split("_")
 

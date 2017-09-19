@@ -92,15 +92,21 @@ class MongoDatabase():
         db = client.database
 
         pipeline = [
-            {'$match': {
-                'timestamp': {'$gte': lower_bound, '$lt': upper_bound}
+            {
+                '$match': {
+                    'timestamp': {
+                        '$gte': lower_bound, '$lt': upper_bound
+                    }
                 }
             },
-            {'$project': {
-                '_id': 0,
-                self.FIELD_CHANNEL_ID: 1,
-                self.FIELD_TIMESTAMP: 1,
-                'match': {'$setIntersection': [hashlist, '$fingerprints.hash']},              
+            {
+                '$project': {
+                    '_id': 0,
+                    self.FIELD_CHANNEL_ID: 1,
+                    self.FIELD_TIMESTAMP: 1,
+                    'match': {
+                        '$setIntersection': [hashlist, '$fingerprints.hash']
+                    },
                 }
             },
             {
