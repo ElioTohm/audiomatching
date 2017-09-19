@@ -39,10 +39,10 @@ api = Api(app)
 
 app.config.update(
     CELERY_BROKER_URL= 'pyamqp://xms:987456321rabbitmq@127.0.0.1:5672/xms',
-    CELERY_RESULT_BACKEND='mongodb://127.0.0.1/celery',
+    CELERY_RESULT_BACKEND='mongodb://xmsmongodb:xms@Prro#123mongo127.0.0.1/database',
     MONGO_DBNAME='database',
-    # MONGO_USERNAME='xmsmongodb',
-    # MONGO_PASSWORD='xms@Prro#123mongo',
+    MONGO_USERNAME='xmsmongodb',
+    MONGO_PASSWORD='xms@Prro#123mongo',
     MONGO_CONNECT=False
 )
 
@@ -132,8 +132,8 @@ class MatchRequest (Resource) :
                 clientrecording.save(os.path.join(module_dir +'/clientrecord/', filename))
         
         for clientrecording in request.files.getlist('client_record'):
-            # match.apply_async((clientrecording.filename,), countdown=30)
-            match.delay(clientrecording.filename)
+            match.apply_async((clientrecording.filename,), countdown=30)
+            # match.delay(clientrecording.filename)
         
         return 200
 
