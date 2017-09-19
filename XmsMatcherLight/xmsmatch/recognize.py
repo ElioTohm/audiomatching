@@ -31,14 +31,7 @@ class FileRecognizer(BaseRecognizer):
         timestamp_without_mp3 = filename_info_array[2].split(".") 
         timestamp = int(timestamp_without_mp3[0])
 
-        t = time.time()
-        match = self._recognize(timestamp, filename_info_array[1], *frames)
-        t = time.time() - t
-
-        if match:
-            match['match_time'] = t
-
-        return match
+        return self._recognize(timestamp, filename_info_array[1], *frames)
 
     def recognize(self, filename):
         return self.recognize_file(filename)

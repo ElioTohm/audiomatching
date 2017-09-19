@@ -10,7 +10,7 @@ from bson.json_util import dumps, loads
 import json
 import os
 import datetime
-import pprint
+from pprint import pprint
 from werkzeug.utils import secure_filename
 from xmsmatch import Matcher
 from xmsmatch.recognize import FileRecognizer
@@ -40,6 +40,7 @@ app.config.update(
     CELERY_RESULT_BACKEND='mongodb://127.0.0.1/celery',
     MONGO_DBNAME='database',
     MONGO_CONNECT=False
+
 )
 
 mongo = PyMongo(app)
@@ -85,22 +86,18 @@ def match(clientrecording):
 
         client_file_path = os.path.join(module_dir, 'clientrecord/' + clientrecording)
         record = djv.recognize(FileRecognizer, client_file_path)
-
-        pprint(record)
-
+       
         os.unlink(client_file_path)
-        # client_id = str(clientrecording).split("_")
+        client_id = str(clientrecording).split("_")
 
-        # if record is None:
-        #     timestamp = str(client_id[2]).split(".")
-        #     result.append({'none':client_file_path, 'client_id': client_id[1],
-        #                    'timestamp': timestamp[0], 'channel_name':'Muted', 'confidence':'Muted'})
-        # else:
-        #     result.append(record)
+        if record is None:
+            timestamp = str(client_id[2]).split(".")
+            result.append({'none':client_file_path, 'client_id': client_id[1],
+                           'timestamp': timestamp[0], 'channel_name':'Muted', 'confidence':'Muted'})
+        else:
+            result.append(record)
         
-        # mongo.records.insert_many(result)
-
-        return "done"
+        mongo.db.records.insert_many(result)
 
 TODOS = {
     'todo1': {'task': 'build an API'},

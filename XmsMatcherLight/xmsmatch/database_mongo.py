@@ -6,6 +6,7 @@ from itertools import izip_longest
 import json
 import os
 import pprint
+import numpy as np
 from pymongo import MongoClient
 
 class MongoDatabase():
@@ -103,24 +104,31 @@ class MongoDatabase():
                 '$project': {
                     '_id': 0,
                     self.FIELD_CHANNEL_ID: 1,
-                    self.FIELD_TIMESTAMP: 1,
-                    'match': {
-                        '$setIntersection': [hashlist, '$fingerprints.hash']
+                    self.FIELD_CHANNEL_NAME: 1,
+                    'confidence': {
+                        '$size': {
+                            '$setIntersection': [hashlist, '$fingerprints.hash']
+                        }
                     },
                 }
             },
             {
               '$redact': {
-                '$cond': [{ '$lt': [ { '$size': '$match' }, len(hashlist)/2 ] },'$$PRUNE','$$KEEP']
+                '$cond': [{ '$lt': [ '$confidence', len(hashlist)/2 ] },'$$PRUNE','$$KEEP']
               }
-            }
+            },
+            { 
+                '$sort' : {'confidence' : -1} 
+            },
+            { "$limit": 1 }
         ]
 
-        matches = db.fingerprints.aggregate(pipeline)
-        with open('test1.json','wb+') as f:
-            for match in matches:
-                f.write(json.dumps(match))
-
+        return db.fingerprints.aggregate(pipeline)
+        
+        # with open('test1.json','wb+') as f:
+        #     for match in matches:
+        #         f.write(json.dumps(match))
+        #         print np.shape(match['match'])
 
 
 def grouper(iterable, n, fillvalue=None):
