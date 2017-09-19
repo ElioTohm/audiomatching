@@ -14,6 +14,8 @@ from pprint import pprint
 from werkzeug.utils import secure_filename
 from xmsmatch import Matcher
 from xmsmatch.recognize import FileRecognizer
+import paho.mqtt.publish as publish
+
 
 def make_celery(app):
 
@@ -39,13 +41,16 @@ app.config.update(
     CELERY_BROKER_URL='pyamqp://xms:987456321rabbitmq@127.0.0.1:5672/',
     CELERY_RESULT_BACKEND='mongodb://127.0.0.1/celery',
     MONGO_DBNAME='database',
+    # MONGO_USERNAME='xmsmongodb',
+    # MONGO_PASSWORD='xms@Prro#123mongo',
     MONGO_CONNECT=False
-
 )
 
 mongo = PyMongo(app)
 
 celery = make_celery(app)
+
+parser = reqparse.RequestParser()
 
 @celery.task()
 def fingerprint(mp3file):
@@ -99,54 +104,6 @@ def match(clientrecording):
         
         mongo.db.records.insert_many(result)
 
-TODOS = {
-    'todo1': {'task': 'build an API'},
-    'todo2': {'task': '?????'},
-    'todo3': {'task': 'profit!'},
-}
-
-
-def abort_if_todo_doesnt_exist(todo_id):
-    if todo_id not in TODOS:
-        abort(404, message="Todo {} doesn't exist".format(todo_id))
-
-parser = reqparse.RequestParser()
-parser.add_argument('task')
-
-
-# Todo
-# shows a single todo item and lets you delete a todo item
-class Todo(Resource):
-    def get(self, todo_id):
-        abort_if_todo_doesnt_exist(todo_id)
-        
-        add_together.delay(23, 42)
-        
-        return TODOS[todo_id]
-
-    def delete(self, todo_id):
-        abort_if_todo_doesnt_exist(todo_id)
-        del TODOS[todo_id]
-        return '', 204
-
-    def put(self, todo_id):
-        args = parser.parse_args()
-        task = {'task': args['task']}
-        TODOS[todo_id] = task
-        return task, 201
-
-
-class TodoList(Resource):
-    def get(self):
-        return TODOS
-
-    def post(self):
-        args = parser.parse_args()
-        todo_id = int(max(TODOS.keys()).lstrip('todo')) + 1
-        todo_id = 'todo%i' % todo_id
-        TODOS[todo_id] = {'task': args['task']}
-        return TODOS[todo_id], 201
-
 class FingerprintRequest (Resource) :
     def post(self):
         module_dir = os.path.dirname(__file__)
@@ -180,15 +137,59 @@ class MatchRequest (Resource) :
         
         return 200
 
+class RegisterRequest (Resource) :
+    """
+        register the client
+    """
+    def post(self):
+        data = json.loads(request.data)
+
+        client_name = 'Unknown'
+        if data['name'] != "":
+            client_name = data['name']
+
+        client_inserted = getnextsequence(mongo.db.counters, "client_id")
+        if not data['long'] or not data['lat']:
+            mongo.db.clients.insert({'_id': client_inserted, 'name': client_name})
+
+        else:
+            mongo.db.clients.insert({'_id': client_inserted, 'name': client_name,
+                               'lon': data['long'], 'lat': data['lat']})
+
+        return Response({'registered': client_inserted, 'version': 0})
+
+    def getnextsequence(collection, name):
+        """
+            read last number form counters document
+            and increament
+        """
+        return collection.find_and_modify(query={'_id': name},
+                                      update={'$inc': {'seq': 1}}, new=True).get('seq')
+
+class ClientUpdateRequest(Resource):
+    """
+    Publish message to clients
+    """
+    def post(self):
+        message = "{version:%s, update: %s}" % (1, True)
+
+        publish.single("Client", payload=json.dumps(message), hostname="localhost", port=1883,
+                       auth={'username':'pahopmclient', 'password':'xms@pmclient#12345'})
+
+        return HttpResponse('200')
+
+    def get(self):
+        template = loader.get_template('clientmanager/clientadmin.html')
+        return HttpResponse(template.render())
+
+
 ##
 ## Actually setup the Api resource routing here
 ##
-api.add_resource(TodoList, '/todos')
-api.add_resource(Todo, '/todos/<todo_id>')
 api.add_resource(FingerprintRequest, '/fingerprint/')
 api.add_resource(MatchRequest, '/matching/match/')
-# api.add_resource(RegisterRequest, '/register/')
-# api.add_resource(ClientUpdateRequest, '/update/')
+api.add_resource(RegisterRequest, '/register/')
+api.add_resource(ClientUpdateRequest, '/update/')
 
 if __name__ == '__main__':
     app.run(debug=True)
