@@ -39,10 +39,10 @@ api = Api(app)
 
 app.config.update(
     CELERY_BROKER_URL= 'pyamqp://xms:987456321rabbitmq@127.0.0.1:5672/xms',
-    CELERY_RESULT_BACKEND='mongodb://xms:987456321mongo@127.0.0.1/celery',
+    CELERY_RESULT_BACKEND='mongodb://127.0.0.1/celery',
     MONGO_DBNAME='database',
-    MONGO_USERNAME='xmsmongodb',
-    MONGO_PASSWORD='xmsPrro123mongo',
+    # MONGO_USERNAME='xmsmongodb',
+    # MONGO_PASSWORD='xmsPrro123mongo',
     MONGO_CONNECT=False
 )
 
