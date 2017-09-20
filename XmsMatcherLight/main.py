@@ -39,10 +39,11 @@ api = Api(app)
 
 app.config.update(
     CELERY_BROKER_URL= 'pyamqp://xms:987456321rabbitmq@127.0.0.1:5672/xms',
-    CELERY_RESULT_BACKEND='mongodb://xms:987456321mongo@127.0.0.1/celery',
+    CELERY_RESULT_BACKEND='mongodb://127.0.0.1/celery',
+    # 'mongodb://xms:987456321mongo@127.0.0.1/celery',
     MONGO_DBNAME='database',
-    MONGO_USERNAME='xmsmongodb',
-    MONGO_PASSWORD='xms@Prro#123mongo',
+    # MONGO_USERNAME='xmsmongodb',
+    # MONGO_PASSWORD='xms@Prro#123mongo',
     MONGO_CONNECT=False
 )
 
@@ -98,7 +99,7 @@ def match(clientrecording):
         if record is None:
             timestamp = str(client_id[2]).split(".")
             result.append({'none':client_file_path, 'client_id': client_id[1],
-                           'timestamp': timestamp[0], 'channel_name':'Muted', 'confidence':'Muted'})
+                           'timestamp': int(timestamp[0]), 'channel_name':'Muted', 'confidence':'Muted'})
         else:
             result.append(record)
         

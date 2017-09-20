@@ -24,7 +24,6 @@ class MongoDatabase():
     FINGERPRINTS_TABLENAME = "fingerprints"
     RECORD_TABLE = "records"
     TSI_BOUND = 15
-    LASTSAVEDRECORD = 1200
 
     # fields
     FIELD_FINGERPRINTED = "fingerprinted"
