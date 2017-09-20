@@ -42,7 +42,7 @@ app.config.update(
     CELERY_RESULT_BACKEND='mongodb://xms:987456321mongo@127.0.0.1/celery',
     MONGO_DBNAME='database',
     MONGO_USERNAME='xmsmongodb',
-    MONGO_PASSWORD='xms@Prro#123mongo',
+    MONGO_PASSWORD='xmsPrro123mongo',
     MONGO_CONNECT=False
 )
 
