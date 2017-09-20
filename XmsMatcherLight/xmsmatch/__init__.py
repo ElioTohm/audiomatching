@@ -74,6 +74,7 @@ class Matcher(object):
             return None
         else:
             matches[0]['timestamp'] = timestamp
+            matches[0]['client_id'] = client_id
 
             return matches[0]
 
