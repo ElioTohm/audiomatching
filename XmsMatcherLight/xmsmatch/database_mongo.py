@@ -55,7 +55,11 @@ class MongoDatabase():
             hashlist.append(hash)
         
 
-        client = MongoClient('mongodb://%s:%s@127.0.0.1' % ('xmsmongodb', 'xms@Prro#123mongo'))
+        client = MongoClient('127.0.0.1',
+                      user='xmsmongodb',
+                      password='xms@Prro#123mongo',
+                      authSource='database',
+                      authMechanism='SCRAM-SHA-1')
         db = client.database
 
         pipeline = [
