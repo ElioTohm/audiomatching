@@ -112,7 +112,7 @@ def setup_periodic_tasks(sender, **kwargs):
         Set up periodic task for celerybeat
     """
     channels = ['']
-    sender.add_periodic_task(20.0, periodicadddata.s(), name='periodic')
+    sender.add_periodic_task(120.0, periodicadddata.s(), name='periodic')
 
 @celery.task()
 def periodicadddata():
