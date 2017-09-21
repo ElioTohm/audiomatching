@@ -4,18 +4,20 @@
 from flask import Flask, request
 from flask_restful import reqparse, abort, Api, Resource
 from celery import Celery
+from celery.schedules import crontab
 from flask_pymongo import PyMongo
 from bson import Binary, Code
 from bson.json_util import dumps, loads
 import json
 import os
 import datetime
+import time
 from pprint import pprint
 from werkzeug.utils import secure_filename
 from xmsmatch import Matcher
 from xmsmatch.recognize import FileRecognizer
 import paho.mqtt.publish as publish
-
+import random
 
 def make_celery(app):
 
@@ -38,7 +40,7 @@ app = Flask(__name__)
 api = Api(app)
 
 app.config.update(
-    CELERY_BROKER_URL= 'pyamqp://xms:987456321rabbitmq@127.0.0.1:5672/xms',
+    CELERY_BROKER_URL='pyamqp://xms:987456321rabbitmq@127.0.0.1:5672/',
     CELERY_RESULT_BACKEND='mongodb://127.0.0.1/celery',
     MONGO_DBNAME='database',
     # MONGO_USERNAME='xmsmongodb',
@@ -103,6 +105,36 @@ def match(clientrecording):
             result.append(record)
         
         mongo.db.records.insert_many(result)
+
+@celery.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    """
+        Set up periodic task for celerybeat
+    """
+    channels = ['']
+    sender.add_periodic_task(20.0, periodicadddata.s(), name='periodic')
+
+@celery.task()
+def periodicadddata():
+    """
+        task to be added periodically
+    """
+    clients = ['1', '2', '3', '9', '7', '4', '5', '10', '11', '15', '16', '17']
+    channels = ['MBCAction', 'MBC1', 'MBC2', 'MBC3', 'MBC4', 'Muted', 'Other']
+
+    timestamp = int(time.time())
+    if timestamp % 60 < 30:
+        timestamp = timestamp - (timestamp % 60)
+    else:
+        timestamp = timestamp - (timestamp % 60) + 60
+
+    records = []
+    for client_id in clients:
+        records.append({'channel_name': random.choice(channels), 'client_id': client_id,
+                        'confidence': 2500, 'timestamp': timestamp})
+
+    mongo.db.records.insert_many(records)
+
 
 class FingerprintRequest (Resource) :
     def post(self):
