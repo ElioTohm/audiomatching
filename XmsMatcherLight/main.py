@@ -132,7 +132,7 @@ class MatchRequest (Resource) :
                 clientrecording.save(os.path.join(module_dir +'/clientrecord/', filename))
         
         for clientrecording in request.files.getlist('client_record'):
-            match.apply_async((clientrecording.filename,), countdown=30)
+            match.apply_async((clientrecording.filename,), countdown=5)
             # match.delay(clientrecording.filename)
         
         return 200
