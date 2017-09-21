@@ -80,7 +80,7 @@ class MongoDatabase():
             },
             {
               '$redact': {
-                '$cond': [{ '$lt': [ '$confidence', 5 ] },'$$PRUNE','$$KEEP']
+                '$cond': [{ '$lt': [ '$confidence', 1 ] },'$$PRUNE','$$KEEP']
               }
             },
             { 
