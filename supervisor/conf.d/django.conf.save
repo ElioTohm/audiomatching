@@ -4,15 +4,15 @@
 
 [program:XMSmatcher]
 ; Set full path to celery program if using virtualenv
-command=python manage.py runserver 0:45454
+command=export python runserver 0:45454
 
 
-directory=/home/xms/DEP/XmsMatcher/
+directory=/home/xms/DEP/XmsMatcherLight/
 user=xms
 numprocs=1
 stdout_logfile=/var/log/celery/Django.log
 stderr_logfile=/var/log/celery/Django.log
-autostart=flase
+autostart=true
 autorestart=unexpected
 startsecs=10
 
