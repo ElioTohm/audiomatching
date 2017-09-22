@@ -8,6 +8,7 @@ import os
 import pprint
 import numpy as np
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 class MongoDatabase():
     '''
@@ -35,7 +36,7 @@ class MongoDatabase():
         """
         values = []
         for hash, offset in hashes:
-            values.append({"hash": hash, "offset": offset})
+            values.append({"hash": ObjectId(hash), "offset": offset})
 
         return {self.FIELD_CHANNEL_ID: channel_id, self.FIELD_CHANNEL_NAME: channel_name,
                 self.FIELD_FILE_SHA1: file_hash, self.FIELD_TIMESTAMP: int(timestamp),
@@ -52,7 +53,7 @@ class MongoDatabase():
         hashlist = list()
 
         for hash, offset in hashes:
-            hashlist.append(hash)
+            hashlist.append(ObjectId(hash))
         
 
         client = MongoClient(connect=False)
