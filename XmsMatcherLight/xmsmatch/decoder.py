@@ -4,6 +4,7 @@ import numpy as np
 from pydub import AudioSegment
 from pydub.utils import audioop
 import wavio
+import json
 from hashlib import sha1
 
 def unique_hash(filepath, blocksize=2**20):
