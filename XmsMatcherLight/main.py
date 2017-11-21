@@ -184,23 +184,22 @@ class RegisterRequest (Resource) :
         if data['name'] != "":
             client_name = data['name']
 
-        client_inserted = getnextsequence(mongo.db.counters, "client_id")
+        client_inserted = self.getnextsequence(mongo.db.counters, "clients")
+
         if not data['long'] or not data['lat']:
             mongo.db.clients.insert({'_id': client_inserted, 'name': client_name})
-
         else:
             mongo.db.clients.insert({'_id': client_inserted, 'name': client_name,
                                'lon': data['long'], 'lat': data['lat']})
 
-        return Response({'registered': client_inserted, 'version': 0})
+        return {'registered': client_inserted, 'version': 0}
 
-    def getnextsequence(collection, name):
+    def getnextsequence(self, collection, name):
         """
             read last number form counters document
             and increament
         """
-        return collection.find_and_modify(query={'_id': name},
-                                      update={'$inc': {'seq': 1}}, new=True).get('seq')
+        return collection.find_and_modify(query={'_id': name},update={'$inc': {'seq': 1}}, new=True).get('seq')
 
 class ClientUpdateRequest(Resource):
     """
@@ -212,12 +211,7 @@ class ClientUpdateRequest(Resource):
         publish.single("Client", payload=json.dumps(message), hostname="localhost", port=1883,
                        auth={'username':'pahopmclient', 'password':'xms@pmclient#12345'})
 
-        return HttpResponse('200')
-
-    def get(self):
-        template = loader.get_template('clientmanager/clientadmin.html')
-        return HttpResponse(template.render())
-
+        return '200'
 
 ##
 ## Actually setup the Api resource routing here
