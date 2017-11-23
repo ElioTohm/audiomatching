@@ -8,6 +8,3 @@ sudo apt install -y  ffmpeg libav-tools
 
 # Installation if flask framework was in use 
 sudo pip install pymongo celery datetime markdown numpy scipy pyaudio paho-mqtt flask flask-restful Flask-PyMongo gevent
-
-python manage.py migrate
-
