@@ -13,8 +13,9 @@ from django.http import JsonResponse
 import warnings
 import json
 import os
-from XmsMatcher import tasks 
+from XmsMatcher import tasks
 from pymongo import MongoClient
+from django.conf import settings
 
 warnings.filterwarnings("ignore")
 

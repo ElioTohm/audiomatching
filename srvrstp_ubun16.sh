@@ -3,7 +3,8 @@ sudo apt install -y python-mysqldb python-tk python-scipy libasound-dev portaudi
 
 sudo apt install -y  ffmpeg libav-tools
 
-pip install pymongo celery django datetime djangorestframework markdown django-filter numpy scipy pyaudio paho-mqtt
+# Installation if django framework was in use
+# sudo pip install pymongo celery django datetime djangorestframework markdown django-filter numpy scipy pyaudio paho-mqtt 
 
-python manage.py migrate
-
+# Installation if flask framework was in use 
+sudo pip install pymongo celery datetime markdown numpy scipy pyaudio paho-mqtt flask flask-restful Flask-PyMongo gevent

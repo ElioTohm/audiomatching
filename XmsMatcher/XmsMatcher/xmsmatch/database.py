@@ -104,15 +104,15 @@ class Database(object):
         """
         pass
 
-    @abc.abstractmethod
-    def insert_record(self, channel_id, channel_name, timestamp):
-        """
-        Inserts a record name into the database, returns the new
-        identifier of the record.
+    # @abc.abstractmethod
+    # def insert_record(self, channel_id, channel_name, timestamp):
+    #     """
+    #     Inserts a record name into the database, returns the new
+    #     identifier of the record.
 
-        channel_id: The name of the record.
-        """
-        pass
+    #     channel_id: The name of the record.
+    #     """
+    #     pass
 
     @abc.abstractmethod
     def query(self, hash):
@@ -174,4 +174,4 @@ def get_database(database_type=None):
 
 
 # Import our default database handler
-import XmsMatcher.xmsmatch.database_sql
+import XmsMatcher.xmsmatch.database_mongo

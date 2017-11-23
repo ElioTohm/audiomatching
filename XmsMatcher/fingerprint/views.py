@@ -12,7 +12,7 @@ from django.http import JsonResponse
 import warnings
 import json
 import os
-from XmsMatcher import tasks 
+from XmsMatcher import tasks
 warnings.filterwarnings("ignore")
 
 
@@ -32,7 +32,7 @@ def fingerprintfolder(request):
                 with open(module_dir +'/mp3/' + str(clientrecording), 'wb+') as destination:
                     for chunk in clientrecording.chunks():
                         destination.write(chunk)
-        tasks.fingerprint.delay(recordarray)
+                tasks.fingerprint.delay(str(clientrecording))
 
         return Response({'fingerprint':'done'})
 

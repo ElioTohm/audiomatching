@@ -1,11 +1,14 @@
-from XmsMatcher.xmsmatch.database import get_database, Database
-import decoder as decoder
-import fingerprint
-import multiprocessing.dummy
+'''
+matching code 
+'''
 import os
 import traceback
 import sys
-
+import xmsmatch.database_mongo as database_mongo
+import xmsmatch.decoder as decoder
+import xmsmatch.fingerprint as fingerprint
+import numpy as np
+from pprint import pprint
 
 class Matcher(object):
 
@@ -23,10 +26,7 @@ class Matcher(object):
         self.config = config
 
         # initialize db
-        db_cls = get_database(config.get("database_type", None))
-
-        self.db = db_cls(**config.get("database", {}))
-        self.db.setup()
+        self.db = database_mongo.MongoDatabase()
 
         # if we should limit seconds fingerprinted,
         # None|-1 means use entire track
@@ -65,55 +65,18 @@ class Matcher(object):
 
             Returns a dictionary with match information.
         """
-        # align by diffs
-        diff_counter = {}
-        largest = 0
-        largest_count = 0
-        record_id = -1
-        for tup in matches:
-            sid, diff = tup
-            if diff not in diff_counter:
-                diff_counter[diff] = {}
-            if sid not in diff_counter[diff]:
-                diff_counter[diff][sid] = 0
-            diff_counter[diff][sid] += 1
-
-            if diff_counter[diff][sid] > largest_count:
-                largest = diff
-                largest_count = diff_counter[diff][sid]
-                record_id = sid
-
-        # extract idenfication
-        record = self.db.get_record_by_id(record_id)
-        if record:
-
-            recordname = record.get(Matcher.CHANNEL_ID, None)
-            channel_name = record.get(Matcher.CHANNEL_NAME, None)
-        else:
-            return None
-
-        # return match info
-        nseconds = round(float(largest) / fingerprint.DEFAULT_FS *
-                         fingerprint.DEFAULT_WINDOW_SIZE *
-                         fingerprint.DEFAULT_OVERLAP_RATIO, 5)
-
         if timestamp % 60 < 30:
             timestamp = timestamp - (timestamp % 60)
         else:
             timestamp = timestamp - (timestamp % 60) + 60
+        
+        if not matches:
+            return None
+        else:
+            matches[0]['timestamp'] = timestamp
+            matches[0]['client_id'] = client_id
 
-        record = {
-            Matcher.RECORD_ID : record_id,
-            Matcher.CHANNEL_ID : recordname,
-            Matcher.CHANNEL_NAME : channel_name,
-            Matcher.CONFIDENCE : largest_count,
-            Matcher.OFFSET : int(largest),
-            Matcher.OFFSET_SECS : nseconds,
-            Database.FIELD_FILE_SHA1 : record.get(Database.FIELD_FILE_SHA1, None),
-            Database.FIELD_TIMESTAMP: timestamp,
-            'client_id' : client_id
-            }
-        return record
+            return matches[0]
 
     def recognize(self, recognizer, *options, **kwoptions):
         r = recognizer(self)
@@ -143,8 +106,6 @@ def _fingerprint_worker(filename, limit=None, channel_id=None):
                                                  filename))
         result |= set(hashes)
 
-        # delete file after fingerprinting
-        os.unlink(filename)
 
     return channel_id, result, file_hash
 
