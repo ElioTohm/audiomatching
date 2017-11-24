@@ -7,4 +7,4 @@ sudo apt install -y  ffmpeg libav-tools
 # sudo pip install pymongo celery django datetime djangorestframework markdown django-filter numpy scipy pyaudio paho-mqtt 
 
 # Installation if flask framework was in use 
-sudo pip install pymongo celery datetime markdown numpy scipy pyaudio paho-mqtt flask flask-restful Flask-PyMongo gevent
+sudo pip install pymongo celery datetime markdown numpy scipy pyaudio paho-mqtt flask flask-restful Flask-PyMongo gevent pydub matplotlib
