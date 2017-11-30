@@ -93,19 +93,24 @@ def match(clientrecording):
         result = list()
 
         client_file_path = os.path.join(module_dir, 'clientrecord/' + clientrecording)
-        record = djv.recognize(FileRecognizer, client_file_path)
-       
-        os.unlink(client_file_path)
-        client_id = str(clientrecording).split("_")
+        if os.path.getsize(client_file_path) > 0 :
+            record = djv.recognize(FileRecognizer, client_file_path)
 
-        if record is None:
-            timestamp = str(client_id[2]).split(".")
-            result.append({'none':client_file_path, 'client_id': client_id[1],
-                           'timestamp': int(timestamp[0]), 'channel_name':'Muted', 'confidence':'Muted'})
-        else:
-            result.append(record)
+            os.unlink(client_file_path)
+            client_id = str(clientrecording).split("_")
+
+            if record is None:
+                timestamp = str(client_id[2]).split(".")
+                result.append({'none': client_file_path, 'client_id': client_id[1],
+                            'timestamp': int(timestamp[0]), 'channel_name': 'Muted', 'confidence': 'Muted'})
+            else:
+                result.append(record)
+
+            mongo.db.records.insert_many(result)
+        else :
+            os.unlink(client_file_path)
+
         
-        mongo.db.records.insert_many(result)
 
 class FingerprintRequest (Resource) :
     def post(self):
