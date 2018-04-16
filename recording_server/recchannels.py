@@ -10,8 +10,8 @@ from requests.auth import HTTPBasicAuth
 print "Starting Record ..."
 Config = ConfigParser.ConfigParser()
 Config.read("config.ini")
-record_dir = Config.get("URL", "MATCHER_SERVER")
-url = Config.get("DIR", "CHANNEL_RECORD_DIR")
+url = Config.get("URL", "MATCHER_SERVER")
+record_dir = Config.get("DIR", "CHANNEL_RECORD_DIR")
 print "Loading Config..."
 now = int(time.time())
 n = datetime.now()
