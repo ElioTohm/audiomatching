@@ -35,49 +35,49 @@ files = []
 
 #try:
 #session = ftplib.FTP('192.168.33.235','elio','201092')
-filename = '/home/user/'+record_dir+'/LBCI_1_'+str(now)+'.mp3'
+filename = record_dir+'/LBCI_1_'+str(now)+'.mp3'
 #file = open(filename, 'rb')
 #session.storbinary('STOR Documents/DEV/XmsMatcher/XmsMatcher/mp3/LBCI_1_'+str(now)+'.mp3', file)
 files.append(('userrecord', open(filename, 'rb')))
 #file.close()
 #os.unlink(filename)
-filename = '/home/user/'+record_dir+'/MTV_2_'+str(now)+'.mp3'
+filename = record_dir+'/MTV_2_'+str(now)+'.mp3'
 #file = open(filename, 'rb')
 #session.storbinary('STOR Documents/DEV/XmsMatcher/XmsMatcher/mp3/MTV_2_'+str(now)+'.mp3', file)
 files.append(('userrecord', open(filename, 'rb')))
 #file.close()
 #os.unlink(filename)
-filename = '/home/user/'+record_dir+'/OTV_3_'+str(now)+'.mp3'
+filename = record_dir+'/OTV_3_'+str(now)+'.mp3'
 #file = open(filename, 'rb')
 #session.storbinary('STOR Documents/DEV/XmsMatcher/XmsMatcher/mp3/OTV_3_'+str(now)+'.mp3', file)
 files.append(('userrecord', open(filename, 'rb')))
 #file.close()
 #os.unlink(filename)
-filename = '/home/user/'+record_dir+'/ALJADEED_4_'+str(now)+'.mp3'
+filename = record_dir+'/ALJADEED_4_'+str(now)+'.mp3'
 #file = open(filename, 'rb')
 #session.storbinary('STOR Documents/DEV/XmsMatcher/XmsMatcher/mp3/ALJADEED_4_'+str(now)+'.mp3', file)
 files.append(('userrecord', open(filename, 'rb')))
 #file.close()
 #os.unlink(filename)
-filename = '/home/user/'+record_dir+'/TL_5_'+str(now)+'.mp3'
+filename = record_dir+'/TL_5_'+str(now)+'.mp3'
 #file = open(filename, 'rb')
 #session.storbinary('STOR Documents/DEV/XmsMatcher/XmsMatcher/mp3/TL_5_'+str(now)+'.mp3', file)
 files.append(('userrecord', open(filename, 'rb')))
 #file.close()
 #os.unlink(filename)
-filename = '/home/user/'+record_dir+'/MANAR_6_'+str(now)+'.mp3'
+filename = record_dir+'/MANAR_6_'+str(now)+'.mp3'
 #file = open(filename, 'rb')
 #session.storbinary('STOR Documents/DEV/XmsMatcher/XmsMatcher/mp3/MANAR_6_'+str(now)+'.mp3', file)
 files.append(('userrecord', open(filename, 'rb')))
 #file.close()
 #os.unlink(filename)
-filename = '/home/user/'+record_dir+'/FUTURE_7_'+str(now)+'.mp3'
+filename = record_dir+'/FUTURE_7_'+str(now)+'.mp3'
 #file = open(filename, 'rb')
 #session.storbinary('STOR Documents/DEV/XmsMatcher/XmsMatcher/mp3/FUTURE_7_'+str(now)+'.mp3', file)
 files.append(('userrecord', open(filename, 'rb')))
 #file.close()
 #os.unlink(filename)
-filename = '/home/user/'+record_dir+'/NBN_8_'+str(now)+'.mp3'
+filename = record_dir+'/NBN_8_'+str(now)+'.mp3'
 #file = open(filename, 'rb')
 #session.storbinary('STOR Documents/DEV/XmsMatcher/XmsMatcher/mp3/NBN_8_'+str(now)+'.mp3', file)
 files.append(('userrecord', open(filename, 'rb')))
@@ -90,7 +90,7 @@ print "Finished Upload."
 
 try:
         requests.post(url, auth=('elio','201092elio'), files=files,timeout=15)
-        subprocess.call('rm /home/user/'+record_dir+'/* -f', shell=True)
+        subprocess.call('rm '+record_dir+'/* -f', shell=True)
         print "Post Sent"
 except:
         print "Request Timeout."
