@@ -41,8 +41,6 @@ files.append(('userrecord', open(filename, 'rb')))
 filename = record_dir+'/MBCAction_5_'+str(now)+'.mp3'
 files.append(('userrecord', open(filename, 'rb')))
 
-print "Finished Upload."
-
 try:
         requests.post(url, auth=('elio','201092elio'), files=files,timeout=15)
         subprocess.call('rm '+record_dir+'/* -f', shell=True)
