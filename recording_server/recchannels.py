@@ -8,7 +8,7 @@ import os
 from requests.auth import HTTPBasicAuth
 
 print "Starting Record ..."
-config = ConfigParser.ConfigParser()
+Config = ConfigParser.ConfigParser()
 Config.read("config.ini")
 record_dir = Config.get("URL", "MATCHER_SERVER")
 url = Config.get("DIR", "CHANNEL_RECORD_DIR")
