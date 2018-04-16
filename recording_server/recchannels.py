@@ -23,11 +23,6 @@ str(now)+'.mp3 -map 0:p:2:1 -t 5 -vn -acodec libmp3lame -ac 1 -ab 64000 -ar 4800
 str(now)+'.mp3 -map 0:p:3:1 -t 5 -vn -acodec libmp3lame -ac 1 -ab 64000 -ar 48000 '+record_dir+'/MBC3_3_'+
 str(now)+'.mp3 -map 0:p:4:1 -t 5 -vn -acodec libmp3lame -ac 1 -ab 64000 -ar 48000 '+record_dir+'/MBC4_4_'+
 str(now)+'.mp3 -map 0:p:5:1 -t 5 -vn -acodec libmp3lame -ac 1 -ab 64000 -ar 48000 '+record_dir+'/MBCAction_5_'+
-# str(now)+'.mp3 -map 0:p:11:1 -t 5 -vn -acodec libmp3lame -ac 1 -ab 64000 -ar 48000 '+record_dir+'/LBCI_6_'+
-# str(now)+'.mp3 -map 0:p:12:1 -t 5 -vn -acodec libmp3lame -ac 1 -ab 64000 -ar 48000 '+record_dir+'/MTV_7_'+
-# str(now)+'.mp3 -map 0:p:13:1 -t 5 -vn -acodec libmp3lame -ac 1 -ab 64000 -ar 48000 '+record_dir+'/OTV_8_'+
-# str(now)+'.mp3 -map 0:p:14:1 -t 5 -vn -acodec libmp3lame -ac 1 -ab 64000 -ar 48000 '+record_dir+'/JADEED_9_'+
-# str(now)+'.mp3 -map 0:p:15:1 -t 5 -vn -acodec libmp3lame -ac 1 -ab 64000 -ar 48000 '+record_dir+'/TL_10_'+
 str(now)+'.mp3', shell=True)
 print "Finished Record"
 print "Uploading ..."
@@ -45,18 +40,6 @@ filename = record_dir+'/MBC4_4_'+str(now)+'.mp3'
 files.append(('userrecord', open(filename, 'rb')))
 filename = record_dir+'/MBCAction_5_'+str(now)+'.mp3'
 files.append(('userrecord', open(filename, 'rb')))
-# filename = record_dir+'/LBCI_6_'+str(now)+'.mp3'
-# files.append(('userrecord', open(filename, 'rb')))
-# filename = record_dir+'/MTV_7_'+str(now)+'.mp3'
-# files.append(('userrecord', open(filename, 'rb')))
-# filename = record_dir+'/OTV_8_'+str(now)+'.mp3'
-# files.append(('userrecord', open(filename, 'rb')))
-# filename = record_dir+'/JADEED_9_'+str(now)+'.mp3'
-# files.append(('userrecord', open(filename, 'rb')))
-# filename = record_dir+'/TL_10_'+str(now)+'.mp3'
-# files.append(('userrecord', open(filename, 'rb')))
-
-#session.quit()
 
 print "Finished Upload."
 
